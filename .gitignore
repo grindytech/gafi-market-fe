@@ -1,0 +1,20 @@
+# trash
+.vscode
+.yarn
+**/.DS_Store
+
+# modules
+node_modules/
+
+# build
+dist
+
+# vercel
+.vercel
+
+# firebase
+.firebase
+.firebaserc
+
+# env
+.env
