@@ -34,9 +34,10 @@ import { TypeMetadataOfCollection, TypeMetadataOfItem } from 'types';
 
 interface NFTDetailOfferProps {
   fee: number | undefined;
-  amount: number;
+  amount: number | undefined;
   metaNFT: TypeMetadataOfItem;
   metaCollection: TypeMetadataOfCollection[] | undefined;
+  refetch: () => void;
 }
 
 export default function NFTDetailOffer({
@@ -44,6 +45,7 @@ export default function NFTDetailOffer({
   amount,
   metaNFT,
   metaCollection,
+  refetch,
 }: NFTDetailOfferProps) {
   const { nft_id, collection_id } = useParams();
 
@@ -68,6 +70,7 @@ export default function NFTDetailOffer({
     onSuccess() {
       onClose();
       reset();
+      refetch();
     },
   });
 
@@ -201,14 +204,17 @@ export default function NFTDetailOffer({
                       fontSize="xl"
                     >
                       {metaNFT?.title || '-'}
-                      <Text
-                        as="strong"
-                        fontWeight="medium"
-                        fontSize="md"
-                        color="primary.a.500"
-                      >
-                        &nbsp;x{amount}
-                      </Text>
+
+                      {amount ? (
+                        <Text
+                          as="strong"
+                          fontWeight="medium"
+                          fontSize="md"
+                          color="primary.a.500"
+                        >
+                          &nbsp;x{amount}
+                        </Text>
+                      ) : null}
                     </Text>
                   </Box>
                 </Flex>

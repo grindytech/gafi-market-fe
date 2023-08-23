@@ -28,7 +28,11 @@ import DurationBlock, { ListDurationProps } from 'components/DurationBlock';
 import useBlockTime from 'hooks/useBlockTime';
 import { BLOCK_TIME } from 'utils/constants';
 
-export default function NFTDetailSell() {
+interface NFTDetailSellProps {
+  refetch: () => void;
+}
+
+export default function NFTDetailSell({ refetch }: NFTDetailSellProps) {
   const { nft_id, collection_id } = useParams();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -83,6 +87,7 @@ export default function NFTDetailSell() {
     key: ['sell_nft', String(nft_id)],
     address: account?.address as string,
     onSuccess() {
+      refetch();
       onClose();
       reset();
     },

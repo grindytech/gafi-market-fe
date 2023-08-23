@@ -6,22 +6,19 @@ import NFTDetailBuy from './NFTDetailBuy';
 import GafiAmount from 'components/GafiAmount';
 import DateBlock from 'components/DateBlock';
 import CancelTrade from 'components/CancelTrade';
-import { AccountId32 } from '@polkadot/types/interfaces';
 import { Option, u128, u32 } from '@polkadot/types';
 
 export interface NFTDetailListingProps {
-  refetch?: () => void;
-  Listings:
-    | {
-        maybePrice: Option<u128> | undefined;
-        endBlock: Option<u32> | undefined;
-        owner: AccountId32 | undefined;
-        trade_id: number;
-        collection_id: number;
-        nft_id: number;
-        amount: number;
-      }[]
-    | undefined;
+  refetch: () => void;
+  Listings?: {
+    maybePrice: Option<u128>;
+    endBlock: Option<u32>;
+    owner: string;
+    trade_id: number;
+    collection_id: number;
+    nft_id: number;
+    amount: number;
+  }[];
 }
 
 export default function NFTDetailListing({
@@ -50,7 +47,7 @@ export default function NFTDetailListing({
               <Tr>
                 <Td>
                   <GafiAmount
-                    amount={Number(meta.maybePrice?.value.toNumber())}
+                    amount={Number(meta.maybePrice.value.toNumber())}
                     sx={{
                       sx: {
                         '&, span': { color: 'shader.a.900', fontSize: 'sm' },
@@ -59,10 +56,7 @@ export default function NFTDetailListing({
                   />
 
                   <Text as="span">
-                    {formatCurrency(
-                      Number(meta.maybePrice?.value.toNumber()),
-                      'usd'
-                    )}
+                    {formatCurrency(Number(meta.maybePrice.value.toNumber()))}
                   </Text>
                 </Td>
 
@@ -76,7 +70,7 @@ export default function NFTDetailListing({
                   <Text as="span">From</Text>
 
                   <Text color="primary.a.500!">
-                    {shorten(String(meta.owner?.toString()), 12)}
+                    {shorten(String(meta.owner.toString()), 12)}
                   </Text>
                 </Td>
 
@@ -85,9 +79,7 @@ export default function NFTDetailListing({
 
                   <DateBlock
                     endBlock={
-                      meta.endBlock?.isSome
-                        ? meta.endBlock.value.toNumber()
-                        : -1
+                      meta.endBlock.isSome ? meta.endBlock.value.toNumber() : -1
                     }
                   />
                 </Td>
@@ -102,7 +94,7 @@ export default function NFTDetailListing({
 
                   <NFTDetailBuy
                     amount={meta.amount}
-                    fee={meta.maybePrice?.value.toNumber() as number}
+                    fee={meta.maybePrice.value.toNumber()}
                     trade_id={meta.trade_id}
                     refetch={refetch}
                     sx={{ borderRadius: 'lg' }}
