@@ -4,12 +4,14 @@ import { Option, StorageKey, u32 } from '@polkadot/types';
 import { PalletGameAuctionConfig } from '@polkadot/types/lookup';
 
 export interface useAuctionConfigOfProps {
-  filter: 'entries' | number[];
+  filter: 'entries' | 'trade_id';
+  arg?: number[];
   key: string | string[] | number | number[];
 }
 
 export default function useAuctionConfigOf({
   filter,
+  arg,
   key,
 }: useAuctionConfigOfProps) {
   const { api } = useAppSelector(state => state.substrate);
@@ -37,14 +39,13 @@ export default function useAuctionConfigOf({
           );
         }
 
-        if (filter) {
+        if (filter && arg) {
           return Promise.all(
-            filter.map(async trade_id => {
-              const service = (await api.query.game.auctionConfigOf(
-                trade_id
-              )) as Option<PalletGameAuctionConfig>;
+            arg.map(async trade_id => {
+              const service = await api.query.game.auctionConfigOf(trade_id);
 
-              if (service.isEmpty) return; // not found
+              // not found
+              if (service.isEmpty) return;
 
               return {
                 trade_id,
@@ -54,6 +55,8 @@ export default function useAuctionConfigOf({
                 duration: service.value.duration,
               };
             })
+          ).then(data =>
+            data.filter((meta): meta is NonNullable<typeof meta> => !!meta)
           );
         }
       }
@@ -61,7 +64,7 @@ export default function useAuctionConfigOf({
       // not found group
       return [];
     },
-    enabled: !!filter,
+    enabled: !!api?.query.game.auctionConfigOf || !!arg,
   });
 
   return {

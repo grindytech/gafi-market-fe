@@ -4,6 +4,13 @@ import { StorageKey, u32 } from '@polkadot/types';
 import { AccountId32 } from '@polkadot/types/interfaces';
 import { Codec } from '@polkadot/types/types';
 
+export interface ItemBalanceOfProps {
+  owner: string;
+  collection_id: number;
+  nft_id: number;
+  amount: string;
+}
+
 export interface useItemBalanceOfProps {
   filter?: 'entries' | 'address';
   arg?: string[];
@@ -33,7 +40,7 @@ export default function useItemBalanceOf({
                 amount: meta.toHuman() as string,
               };
             }
-          );
+          ) as ItemBalanceOfProps[];
         }
 
         if (filter === 'address' && arg) {
@@ -57,7 +64,7 @@ export default function useItemBalanceOf({
                 }
               );
             })
-          ).then(meta => meta.flat());
+          ).then(meta => meta.flat() as ItemBalanceOfProps[]);
         }
       }
 

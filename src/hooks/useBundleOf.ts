@@ -12,7 +12,7 @@ export interface useBundleOfProps {
 export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
   const { api } = useAppSelector(state => state.substrate);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['bundleOf', key],
     queryFn: async () => {
       if (api) {
@@ -66,5 +66,6 @@ export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
     bundleOf: data,
     isLoading,
     isError,
+    refetch,
   };
 }
