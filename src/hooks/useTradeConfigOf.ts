@@ -1,7 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
-import { Option, StorageKey, u32 } from '@polkadot/types';
-import { PalletGameTradeConfig } from '@polkadot/types/lookup';
+import { Option, StorageKey, Vec, u128, u32 } from '@polkadot/types';
+import {
+  GafiSupportGameTypesTradeType,
+  PalletGameTradeConfig,
+} from '@polkadot/types/lookup';
+import { GafiSupportGameTypesPackage } from '@polkadot/types/lookup';
+
+interface tradeConfigProps {
+  trade_id: number;
+  trade: GafiSupportGameTypesTradeType;
+  owner: string;
+  maybePrice: Option<u128>;
+  maybeRequired: Option<Vec<GafiSupportGameTypesPackage>>;
+  endBlock: Option<u32>;
+}
 
 export interface useTradeConfigOfProps {
   filter: 'entries' | 'trade_id';
@@ -35,7 +48,7 @@ export default function useTradeConfigOf({
                 maybePrice: meta.value.maybePrice,
                 maybeRequired: meta.value.maybeRequired,
                 endBlock: meta.value.endBlock,
-              };
+              } as tradeConfigProps;
             }
           );
         }
@@ -58,7 +71,7 @@ export default function useTradeConfigOf({
               };
             })
           ).then(data =>
-            data.filter((meta): meta is NonNullable<typeof meta> => !!meta)
+            data.filter((meta): meta is tradeConfigProps => !!meta)
           );
         }
       }
