@@ -1,12 +1,9 @@
-import React from 'react';
-
 import { Button, NumberInput, NumberInputField, Stack } from '@chakra-ui/react';
-import { Control, Controller, UseFormSetValue } from 'react-hook-form';
+import { Control, Controller } from 'react-hook-form';
 
 interface AccountOwnerIncrementProps {
   formState: {
     control: Control<any, any>;
-    setValue: UseFormSetValue<any>;
     value: string;
   };
 }
@@ -14,11 +11,6 @@ interface AccountOwnerIncrementProps {
 export default function AccountOwnerIncrement({
   formState,
 }: AccountOwnerIncrementProps) {
-  // first value should return 1
-  React.useEffect(() => {
-    formState.setValue(formState.value, 1);
-  }, []);
-
   return (
     <Stack
       gap={1}

@@ -32,8 +32,10 @@ export default function AccountOwnerSale({
   setDuration,
   listDuration,
 }: AccountOwnerSaleProps) {
-  const { price, product: productMeta } = watch();
-  const product = Object.values(productMeta).map(meta => ({ ...meta }));
+  const { product: productForm, price, selected } = watch();
+
+  const product = Object.values(productForm || []).filter(meta => !!meta);
+
   const isBundle = product.length >= 2;
 
   const navigate = useNavigate();
@@ -65,7 +67,7 @@ export default function AccountOwnerSale({
           }
 
           return navigate(
-            `/nft/${product[0].nft.id}/${product[0].collection.id}`
+            `/nft/${product[0].nft_id}/${product[0].collection_id}`
           );
         }
 
@@ -130,16 +132,16 @@ export default function AccountOwnerSale({
           type="submit"
           isLoading={isLoading}
           onClick={event => {
-            if (api && price) {
+            if (api && price && selected) {
               event.preventDefault();
 
               if (isBundle) {
                 return mutation(
                   api.tx.game.setBundle(
-                    product.map(({ collection, nft }) => ({
-                      collection: collection.id,
-                      item: nft.id,
-                      amount: nft.selected,
+                    product.map(({ collection_id, nft_id }, index) => ({
+                      collection: collection_id,
+                      item: nft_id,
+                      amount: selected[index],
                     })),
                     price,
                     blockNumber,
@@ -152,9 +154,9 @@ export default function AccountOwnerSale({
               return mutation(
                 api.tx.game.setPrice(
                   {
-                    collection: product[0].collection.id,
-                    item: product[0].nft.id,
-                    amount: product[0].nft.selected,
+                    collection: product[0].collection_id,
+                    item: product[0].nft_id,
+                    amount: selected[0],
                   },
                   price,
                   blockNumber,

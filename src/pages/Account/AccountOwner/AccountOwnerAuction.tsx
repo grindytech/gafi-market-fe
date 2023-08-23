@@ -32,8 +32,9 @@ export default function AccountOwnerAuction({
   setDuration,
   listDuration,
 }: AccountOwnerAuctionProps) {
-  const { price, product: productMeta } = watch();
-  const product = Object.values(productMeta).map(meta => ({ ...meta }));
+  const { product: productForm, price, selected } = watch();
+
+  const product = Object.values(productForm || []).filter(meta => !!meta);
 
   const navigate = useNavigate();
 
@@ -121,15 +122,15 @@ export default function AccountOwnerAuction({
           type="submit"
           isLoading={isLoading}
           onClick={event => {
-            if (api && price) {
+            if (api && price && selected) {
               event.preventDefault();
 
               mutation(
                 api.tx.game.setAuction(
-                  product.map(({ collection, nft }) => ({
-                    collection: collection.id,
-                    item: nft.id,
-                    amount: nft.selected,
+                  product.map(({ collection_id, nft_id }, index) => ({
+                    collection: collection_id,
+                    item: nft_id,
+                    amount: selected[index],
                   })),
                   price,
                   0, // block_number >= (config.start_block + config.duration),
