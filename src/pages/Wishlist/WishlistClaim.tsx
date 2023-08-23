@@ -21,6 +21,7 @@ export default ({ trade_id, maybePrice }: WishlistClaimProps) => {
     <Button
       variant="primary"
       px={6}
+      py={4}
       borderRadius="3xl"
       isLoading={isLoading}
       onClick={() => {
