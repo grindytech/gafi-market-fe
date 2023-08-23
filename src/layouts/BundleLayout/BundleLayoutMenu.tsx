@@ -1,30 +1,27 @@
 import {
-  As,
   Icon,
   IconButton,
   Menu,
   MenuButton,
   MenuItem,
+  MenuItemProps,
   MenuList,
   Text,
 } from '@chakra-ui/react';
-import MenuIcon from 'public/assets/line/menu.svg';
-
 import { convertHex } from 'utils/utils';
-import { Swiper } from 'swiper/types';
+import MenuIcon from 'public/assets/line/menu.svg';
 import React from 'react';
 
 interface BundleLayoutMenuProps {
-  swiperRef: React.MutableRefObject<Swiper | undefined>;
   menu: {
-    key: string | number;
     heading: string;
-    icon?: As;
-    onClick: () => void;
+    icon?: any;
+    onClick?: () => void;
   }[];
+  sx?: MenuItemProps;
 }
 
-export default function BundleLayoutMenu({ menu }: BundleLayoutMenuProps) {
+export default ({ menu, sx }: BundleLayoutMenuProps) => {
   return (
     <Menu placement="bottom-end">
       <MenuButton
@@ -47,22 +44,24 @@ export default function BundleLayoutMenu({ menu }: BundleLayoutMenuProps) {
         overflow="hidden"
         borderRadius="lg"
       >
-        {menu.map(menu => (
-          <MenuItem
-            key={menu.key}
-            padding={2}
-            color="shader.a.900"
-            bg="white"
-            gap={2}
-            onClick={menu.onClick}
-            _hover={{ bg: 'shader.a.200' }}
-          >
-            {menu.icon && <Icon width={5} height={5} as={menu.icon} />}
+        {React.Children.toArray(
+          menu.map(menu => (
+            <MenuItem
+              padding={2}
+              color="shader.a.900"
+              bg="white"
+              gap={2}
+              onClick={menu.onClick}
+              _hover={{ bg: 'shader.a.200' }}
+              {...sx}
+            >
+              {menu.icon && <Icon width={5} height={5} as={menu.icon} />}
 
-            <Text pr={24}>{menu.heading}</Text>
-          </MenuItem>
-        ))}
+              <Text pr={24}>{menu.heading}</Text>
+            </MenuItem>
+          ))
+        )}
       </MenuList>
     </Menu>
   );
-}
+};

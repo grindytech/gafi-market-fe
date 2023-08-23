@@ -1,25 +1,31 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
-import { Option, StorageKey, u32 } from '@polkadot/types';
+import { Option, StorageKey, Vec, u128, u32 } from '@polkadot/types';
 import {
   GafiSupportGameTypesTradeType,
   PalletGameTradeConfig,
 } from '@polkadot/types/lookup';
+import { GafiSupportGameTypesPackage } from '@polkadot/types/lookup';
 
-export interface useTradeConfigOfProps {
-  filter: 'entries' | number[];
-  key: string | string[] | number | number[];
-  type?: keyof GafiSupportGameTypesTradeType;
+interface tradeConfigProps {
+  trade_id: number;
+  trade: GafiSupportGameTypesTradeType;
+  owner: string;
+  maybePrice: Option<u128>;
+  maybeRequired: Option<Vec<GafiSupportGameTypesPackage>>;
+  endBlock: Option<u32>;
 }
 
-interface tradeConfigProps extends Partial<PalletGameTradeConfig> {
-  trade_id: number;
+export interface useTradeConfigOfProps {
+  filter: 'entries' | 'trade_id';
+  arg?: number[];
+  key: string | string[] | number | number[];
 }
 
 export default function useTradeConfigOf({
   filter,
+  arg,
   key,
-  type,
 }: useTradeConfigOfProps) {
   const { api } = useAppSelector(state => state.substrate);
 
@@ -35,43 +41,34 @@ export default function useTradeConfigOf({
               StorageKey<[u32]>,
               Option<PalletGameTradeConfig>
             ]) => {
-              if (meta.isEmpty) return; // not found
-
-              const common: tradeConfigProps = {
-                trade: meta.value.trade,
-                owner: meta.value.owner,
-                maybePrice: meta.value.maybePrice,
-                endBlock: meta.value.endBlock,
+              return {
                 trade_id: trade_id.args[0].toNumber(),
-              };
-
-              if (type && meta.value.trade[type]) return common;
-
-              if (!type) return common;
+                trade: meta.value.trade,
+                owner: meta.value.owner.toString(),
+                maybePrice: meta.value.maybePrice,
+                maybeRequired: meta.value.maybeRequired,
+                endBlock: meta.value.endBlock,
+              } as tradeConfigProps;
             }
-          ) as tradeConfigProps[];
+          );
         }
 
-        if (filter) {
+        if (filter === 'trade_id' && arg) {
           return Promise.all(
-            filter.map(async trade_id => {
-              const service = (await api.query.game.tradeConfigOf(
-                trade_id
-              )) as Option<PalletGameTradeConfig>;
+            arg.map(async trade_id => {
+              const service = await api.query.game.tradeConfigOf(trade_id);
 
-              if (service.isEmpty) return; // not found
+              // not found
+              if (service.isEmpty) return;
 
-              const common: tradeConfigProps = {
-                trade: service.value.trade,
-                owner: service.value.owner,
-                maybePrice: service.value.maybePrice,
-                endBlock: service.value.endBlock,
+              return {
                 trade_id,
+                trade: service.value.trade,
+                owner: service.value.owner.toString(),
+                maybePrice: service.value.maybePrice,
+                maybeRequired: service.value.maybeRequired,
+                endBlock: service.value.endBlock,
               };
-
-              if (type && service.value.trade[type]) return common;
-
-              if (!type) return common;
             })
           ).then(data =>
             data.filter((meta): meta is tradeConfigProps => !!meta)
@@ -82,7 +79,7 @@ export default function useTradeConfigOf({
       // not found group
       return [];
     },
-    enabled: !!filter,
+    enabled: !!api?.query.game.tradeConfigOf || !!arg,
   });
 
   return {

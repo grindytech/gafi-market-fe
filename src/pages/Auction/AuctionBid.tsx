@@ -21,7 +21,11 @@ interface AuctionBidFieldProps {
   bid_price: number;
 }
 
-export default function AuctionBid() {
+interface AuctionBidProps {
+  refetch: () => void;
+}
+
+export default function AuctionBid({ refetch }: AuctionBidProps) {
   const { account } = useAppSelector(state => state.injected.polkadot);
   const { api } = useAppSelector(state => state.substrate);
   const { id } = useParams();
@@ -36,6 +40,7 @@ export default function AuctionBid() {
     key: [`bid_auction/${id}`],
     address: account?.address as string,
     onSuccess() {
+      refetch();
       handleClose();
     },
   });

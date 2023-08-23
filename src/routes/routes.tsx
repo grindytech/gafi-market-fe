@@ -11,6 +11,8 @@ import Pool from 'pages/Pool';
 import Collection from 'pages/Collection';
 import NFT from 'pages/NFT';
 import Blockchain, { ListBlockchain } from 'pages/Blockchain';
+import AccountSwap from 'pages/Account/AccountSwap';
+import Swap from 'pages/Swap';
 
 const router = createBrowserRouter([
   {
@@ -32,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: 'pool/:id',
         element: <Pool />,
+      },
+      {
+        path: 'swap/:id',
+        element: <Swap />,
       },
       {
         path: 'collection/:collection_id',
@@ -59,6 +65,10 @@ const router = createBrowserRouter([
           {
             path: ':address/setting',
             element: <AccountSetting />,
+          },
+          {
+            path: 'swap/:address',
+            element: <AccountSwap />,
           },
         ],
       },

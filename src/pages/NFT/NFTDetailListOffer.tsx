@@ -7,11 +7,19 @@ import NFTDetailAcceptOffer from './NFTDetailAcceptOffer';
 import GafiAmount from 'components/GafiAmount';
 import DateBlock from 'components/DateBlock';
 import CancelTrade from 'components/CancelTrade';
-import { NFTDetailListingProps } from './NFTDetailListing';
+import { Option, u128, u32 } from '@polkadot/types';
 
 interface NFTDetailListOfferProps {
-  Offers: NFTDetailListingProps['Listings'];
   refetch: () => void;
+  Offers?: {
+    maybePrice: Option<u128>;
+    endBlock: Option<u32>;
+    owner: string;
+    trade_id: number;
+    collection_id: number;
+    nft_id: number;
+    amount: number;
+  }[];
 }
 
 export default function NFTDetailListOffer({
@@ -40,7 +48,7 @@ export default function NFTDetailListOffer({
               <Tr>
                 <Td>
                   <GafiAmount
-                    amount={Number(meta.maybePrice?.value.toNumber())}
+                    amount={Number(meta.maybePrice.value.toNumber())}
                     sx={{
                       sx: {
                         '&, span': { color: 'shader.a.900', fontSize: 'sm' },
@@ -49,10 +57,7 @@ export default function NFTDetailListOffer({
                   />
 
                   <Text as="span">
-                    {formatCurrency(
-                      Number(meta.maybePrice?.value.toNumber()),
-                      'usd'
-                    )}
+                    {formatCurrency(Number(meta.maybePrice.value.toNumber()))}
                   </Text>
                 </Td>
 
@@ -66,7 +71,7 @@ export default function NFTDetailListOffer({
                   <Text as="span">From</Text>
 
                   <Text color="primary.a.500!">
-                    {shorten(String(meta.owner?.toString()), 12)}
+                    {shorten(String(meta.owner.toString()), 12)}
                   </Text>
                 </Td>
 
@@ -75,9 +80,7 @@ export default function NFTDetailListOffer({
 
                   <DateBlock
                     endBlock={
-                      meta.endBlock?.isSome
-                        ? meta.endBlock.value.toNumber()
-                        : -1
+                      meta.endBlock.isSome ? meta.endBlock.value.toNumber() : -1
                     }
                   />
                 </Td>
@@ -93,7 +96,7 @@ export default function NFTDetailListOffer({
                   <NFTDetailAcceptOffer
                     trade_id={meta.trade_id}
                     refetch={refetch}
-                    price={meta.maybePrice?.value.toNumber() as number}
+                    price={meta.maybePrice.value.toNumber()}
                     amount={meta.amount}
                     sx={{ fontSize: 'sm', fontWeight: 'medium' }}
                   />

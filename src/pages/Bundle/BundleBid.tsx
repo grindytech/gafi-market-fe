@@ -4,7 +4,7 @@ import useSignAndSend from 'hooks/useSignAndSend';
 import { useParams } from 'react-router-dom';
 
 interface BundleBidProps {
-  maybePrice: string;
+  maybePrice: number;
 }
 
 export default function BundleBid({ maybePrice }: BundleBidProps) {
@@ -29,7 +29,7 @@ export default function BundleBid({ maybePrice }: BundleBidProps) {
       variant="primary"
       onClick={() => {
         if (api) {
-          mutation(api.tx.game.buyBundle(Number(id), Number(maybePrice)));
+          mutation(api.tx.game.buyBundle(Number(id), maybePrice));
         }
       }}
     >

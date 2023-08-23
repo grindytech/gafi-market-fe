@@ -1,11 +1,4 @@
-import {
-  Box,
-  Center,
-  CircularProgress,
-  Flex,
-  Grid,
-  VStack,
-} from '@chakra-ui/react';
+import { Box, Center, CircularProgress, Flex } from '@chakra-ui/react';
 
 import CardBox from 'components/CardBox';
 import { useRef, useState } from 'react';
@@ -14,26 +7,47 @@ import useMetaNFT from 'hooks/useMetaNFT';
 
 import { Swiper as SwiperType } from 'swiper/types';
 
-import BundleLayoutModel from 'layouts/BundleLayout/BundleLayoutModel';
-import BundleLayoutMenu from 'layouts/BundleLayout/BundleLayoutMenu';
-import BundleLayoutDuration from 'layouts/BundleLayout/BundleLayoutDuration';
-import BundleLayoutItems from 'layouts/BundleLayout/BundleLayoutItems';
-import BundleLayoutOwner from 'layouts/BundleLayout/BundleLayoutOwner';
-
 import useHighestBidOf from 'hooks/useHighestBidOf';
 import AuctionBid from './AuctionBid';
 import AuctionClaim from './AuctionClaim';
 
 import useBundleOf from 'hooks/useBundleOf';
 import useAuctionConfigOf from 'hooks/useAuctionConfigOf';
+import { Option, u128, u32 } from '@polkadot/types';
+import DefaultDetail from 'layouts/DefaultLayout/DefaultDetail';
+import BundleLayoutModelSwiper from 'layouts/BundleLayout/BundleLayoutModelSwiper';
+import BundleLayoutMenu from 'layouts/BundleLayout/BundleLayoutMenu';
+import BundleLayoutSocial from 'layouts/BundleLayout/BundleLayoutSocial';
+import BundleLayoutCardHeading from 'layouts/BundleLayout/BundleLayoutCardHeading';
+import BundleLayoutHeading from 'layouts/BundleLayout/BundleLayoutHeading';
+import BundleLayoutOwner from 'layouts/BundleLayout/BundleLayoutOwner';
+import BundleLayoutExpires from 'layouts/BundleLayout/BundleLayoutExpires';
+import BundleLayoutPrice from 'layouts/BundleLayout/BundleLayoutPrice';
+import BundleLayoutItems from 'layouts/BundleLayout/BundleLayoutItems';
+
+interface AuctionServiceProps {
+  auctionConfigOf: {
+    trade_id: number;
+    owner: string;
+    maybePrice: Option<u128>;
+    startBlock: u32;
+    duration: u32;
+  }[];
+  bundleOf: {
+    trade_id: number;
+    collection_id: number;
+    nft_id: number;
+    amount: number;
+  }[];
+}
 
 export default function Auction() {
   const { id } = useParams();
-  const navigation = useNavigate();
 
   const { auctionConfigOf, isLoading } = useAuctionConfigOf({
     key: `auction_detail/${id}`,
-    filter: [Number(id)],
+    filter: 'trade_id',
+    arg: [Number(id)],
   });
 
   const { bundleOf } = useBundleOf({
@@ -42,23 +56,46 @@ export default function Auction() {
     arg: [Number(id)],
   });
 
+  if (isLoading)
+    return (
+      <Center height="100vh">
+        <CircularProgress isIndeterminate color="second.purple" />
+      </Center>
+    );
+
+  if (!auctionConfigOf?.length)
+    return <Center height="100vh">Not Found</Center>;
+
+  return (
+    <>
+      {bundleOf?.length && auctionConfigOf?.length ? (
+        <AuctionService auctionConfigOf={auctionConfigOf} bundleOf={bundleOf} />
+      ) : null}
+    </>
+  );
+}
+
+function AuctionService({ bundleOf, auctionConfigOf }: AuctionServiceProps) {
+  const { id } = useParams();
+  const navigation = useNavigate();
+
   const { metaNFT } = useMetaNFT({
-    key: `auction_detail/${id}/${JSON.stringify(bundleOf)}`,
+    key: `auction_detail/${id}`,
     filter: 'collection_id',
-    arg: bundleOf?.map(({ collection_id, nft_id }) => ({
+    arg: bundleOf.map(({ collection_id, nft_id }) => ({
       collection_id,
       nft_id,
     })),
   });
 
-  const { highestBidOf } = useHighestBidOf({
-    key: 'topAuction',
-    filter: auctionConfigOf?.map(
-      meta => meta?.trade_id
-    ) as keyof typeof auctionConfigOf,
+  const { highestBidOf, refetch } = useHighestBidOf({
+    key: `auction_detail/${id}`,
+    filter: 'trade_id',
+    arg: auctionConfigOf.map(meta => meta.trade_id),
   });
 
   const swiperRef = useRef<SwiperType>();
+
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 
   const ListMenu = [
@@ -75,66 +112,70 @@ export default function Auction() {
     },
   ];
 
-  if (isLoading)
-    return (
-      <Center height="100vh">
-        <CircularProgress isIndeterminate color="second.purple" />
-      </Center>
-    );
-
-  if (!auctionConfigOf?.length)
-    return <Center height="100vh">Not Found</Center>;
-
   return (
-    <Box>
-      {bundleOf?.length && auctionConfigOf?.length ? (
-        <>
-          <Grid gridTemplateColumns={{ lg: 'repeat(2, 1fr)' }} gap={5}>
-            <BundleLayoutModel
-              bundleOf={bundleOf}
-              metaNFT={metaNFT}
-              swiperRef={swiperRef}
-              thumbs={thumbsSwiper}
-            >
-              <BundleLayoutMenu swiperRef={swiperRef} menu={ListMenu} />
-            </BundleLayoutModel>
+    <>
+      <DefaultDetail>
+        <BundleLayoutModelSwiper
+          bundleOf={bundleOf.map(({ collection_id, nft_id }) => ({
+            collection_id,
+            nft_id,
+          }))}
+          metaNFT={metaNFT}
+          swiperRef={swiperRef}
+          thumbs={thumbsSwiper}
+        >
+          <BundleLayoutSocial />
 
-            <VStack alignItems="flex-start" gap={4}>
-              <CardBox variant="baseStyle">
-                <BundleLayoutOwner
-                  owner={auctionConfigOf[0]?.owner as string}
-                />
+          <BundleLayoutMenu menu={ListMenu} />
+        </BundleLayoutModelSwiper>
 
-                <BundleLayoutDuration
-                  maybePrice={
-                    highestBidOf?.[0]?.bidPrice ||
-                    auctionConfigOf[0]?.maybePrice.isSome
-                      ? (auctionConfigOf[0]?.maybePrice.value.toHuman() as string)
-                      : '0'
-                  }
-                  duration={{
-                    heading: 'Auction end at',
-                    endBlock: auctionConfigOf[0]?.duration.toNumber() as number,
-                  }}
-                >
-                  <Flex gap={3}>
-                    <AuctionBid />
-
-                    <AuctionClaim />
-                  </Flex>
-                </BundleLayoutDuration>
-              </CardBox>
-
-              <BundleLayoutItems
-                queryKey={`auction/${id}`}
-                heading="Auctions detail"
-                bundleOf={bundleOf}
-                setThumbsSwiper={setThumbsSwiper}
+        <Box>
+          <CardBox variant="baseStyle">
+            <BundleLayoutCardHeading>
+              <BundleLayoutHeading
+                heading="Auction detail"
+                sx={{
+                  as: 'h3',
+                }}
               />
-            </VStack>
-          </Grid>
-        </>
-      ) : null}
-    </Box>
+
+              <BundleLayoutOwner owner={auctionConfigOf[0].owner} />
+            </BundleLayoutCardHeading>
+
+            <CardBox variant="baseStyle" padding={0}>
+              <BundleLayoutExpires
+                heading="Auction"
+                endBlock={auctionConfigOf[0].duration.toNumber()}
+              />
+
+              <BundleLayoutPrice
+                amount={
+                  highestBidOf?.[0]?.bidPrice ||
+                  auctionConfigOf[0].maybePrice.value.toHuman()
+                }
+              />
+
+              <Flex gap={3} padding={6} pt={0}>
+                <AuctionBid refetch={refetch} />
+
+                <AuctionClaim />
+              </Flex>
+            </CardBox>
+
+            <CardBox variant="baseStyle" mt={4}>
+              <BundleLayoutItems
+                queryKey={`auction_detail/${id}`}
+                setThumbsSwiper={setThumbsSwiper}
+                bundleOf={bundleOf.map(({ collection_id, nft_id, amount }) => ({
+                  collection_id,
+                  nft_id,
+                  amount,
+                }))}
+              />
+            </CardBox>
+          </CardBox>
+        </Box>
+      </DefaultDetail>
+    </>
   );
 }

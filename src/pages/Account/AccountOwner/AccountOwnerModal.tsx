@@ -10,11 +10,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
   Text,
 } from '@chakra-ui/react';
 
@@ -25,11 +20,11 @@ import AccountOwnerIncrement from './AccountOwnerIncrement';
 import { Control, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { AccountOwnerFieldProps } from '.';
 
-import React, { useState } from 'react';
-import AccountOwnerSale from './AccountOwnerSale';
-import AccountOwnerAuction from './AccountOwnerAuction';
-import { BLOCK_TIME } from 'utils/constants';
-import { ListDurationProps } from 'components/DurationBlock';
+import useMetaNFT from 'hooks/useMetaNFT';
+import useMetaCollection from 'hooks/useMetaCollection';
+import { useParams } from 'react-router-dom';
+import AccountOwnerModalTab from './AccountOwnerModalTab';
+import { useEffect } from 'react';
 
 interface AccountOwnerModalProps {
   onClose: () => void;
@@ -46,82 +41,32 @@ export default function AccountOwnerModal({
   onClose,
   onSuccess,
 }: AccountOwnerModalProps) {
-  const { product: productState } = formState.watch();
-  const product = Object.values(productState).map(meta => ({ ...meta }));
+  const { address } = useParams();
 
-  const ListDuration: ListDurationProps[] = [
-    {
-      text: '1 Minutes',
-      time: 60 / BLOCK_TIME,
-    },
-    {
-      text: '5 Minutes',
-      time: 300 / BLOCK_TIME,
-    },
-    {
-      text: '1 Hours',
-      time: 3600 / BLOCK_TIME,
-    },
-    {
-      text: '1 Day',
-      time: (86400 * 1) / BLOCK_TIME,
-    },
-    {
-      text: '1 Week',
-      time: (86400 * 7) / BLOCK_TIME,
-    },
-    {
-      text: '2 Weeks',
-      time: (86400 * 14) / BLOCK_TIME,
-    },
-    {
-      text: '1 Month',
-      time: (86400 * 30) / BLOCK_TIME,
-    },
-  ];
+  const { product: productForm } = formState.watch();
 
-  const [duration, setDuration] = React.useState(ListDuration[0]);
+  const product = Object.values(productForm || []).filter(meta => !!meta);
 
-  const [tab, setTab] = useState(0);
+  const { metaNFT } = useMetaNFT({
+    key: `account/${address}`,
+    filter: 'collection_id',
+    arg: product.map(({ collection_id, nft_id }) => ({
+      collection_id,
+      nft_id,
+    })),
+  });
 
-  const ListTab = [
-    {
-      id: 0,
-      heading: 'Ordinary Sale',
-      body: `Sale your NFTs with your set price.`,
-      submit: (
-        <AccountOwnerSale
-          watch={formState.watch}
-          control={formState.control}
-          onSuccess={onSuccess}
-          duration={duration}
-          setDuration={setDuration}
-          listDuration={ListDuration}
-        />
-      ),
-    },
-    {
-      id: 1,
-      heading: 'Auction',
-      body: `The highest bid wins when the auction ends.`,
-      submit: (
-        <AccountOwnerAuction
-          watch={formState.watch}
-          control={formState.control}
-          onSuccess={onSuccess}
-          duration={duration}
-          setDuration={setDuration}
-          listDuration={ListDuration}
-        />
-      ),
-    },
-    {
-      id: 2,
-      heading: 'Candles auction',
-      body: `Auction ends unknown, highest bid wins.`,
-      isDisabled: true,
-    },
-  ];
+  const { MetaCollection } = useMetaCollection({
+    key: `account/${address}`,
+    filter: 'collection_id',
+    arg: product.map(({ collection_id }) => collection_id),
+  });
+
+  useEffect(() => {
+    product.forEach((_, index) => {
+      formState.setValue(`selected.${index}`, 1);
+    });
+  }, []);
 
   return (
     <Modal isOpen={true} onClose={onClose} size="3xl" isCentered>
@@ -162,8 +107,18 @@ export default function AccountOwnerModal({
             }}
             gap={2}
           >
-            {product.map(meta => {
-              const key = `${meta.collection.id}/${meta.nft.id}`;
+            {product.map(({ collection_id, nft_id, amount }, index) => {
+              const key = `${nft_id}/${collection_id}`;
+
+              const currentMetaNFT = metaNFT?.find(
+                data =>
+                  data?.collection_id === collection_id &&
+                  data?.nft_id === nft_id
+              );
+
+              const currentMetaCollection = MetaCollection?.find(
+                data => data?.collection_id === collection_id
+              );
 
               return (
                 <ListItem
@@ -178,7 +133,9 @@ export default function AccountOwnerModal({
                 >
                   <RatioPicture
                     src={
-                      meta.nft?.image ? cloundinary_link(meta.nft.image) : null
+                      currentMetaNFT?.image
+                        ? cloundinary_link(currentMetaNFT.image)
+                        : null
                     }
                     sx={{ width: 20, height: 20 }}
                   />
@@ -191,26 +148,25 @@ export default function AccountOwnerModal({
                     wordBreak="break-word"
                   >
                     <Text fontSize="sm" color="shader.a.500">
-                      {meta.collection?.title || '-'}
+                      {currentMetaCollection?.title || '-'}
                     </Text>
 
                     <Text as="strong">
-                      {meta.nft?.title || '-'}&nbsp;
+                      {currentMetaNFT?.title || '-'}&nbsp;
                       <Text as="span" fontWeight="normal" color="shader.a.700">
-                        ID: {meta.nft.id}
+                        ID: {nft_id}
                       </Text>
                     </Text>
 
                     <Text fontSize="xs" fontWeight="normal">
-                      x{meta.nft?.amount}
+                      x{amount}
                     </Text>
                   </Box>
 
                   <AccountOwnerIncrement
                     formState={{
                       control: formState.control,
-                      setValue: formState.setValue,
-                      value: `product.${key}.nft.selected`,
+                      value: `selected.${index}`,
                     }}
                   />
                 </ListItem>
@@ -218,71 +174,7 @@ export default function AccountOwnerModal({
             })}
           </List>
 
-          <Tabs variant="unstyled" onChange={e => setTab(e)} index={tab}>
-            <TabList gap={2} overflowX="auto" padding={6} paddingBottom={4}>
-              {ListTab.map(meta => (
-                <Tab
-                  key={meta.heading}
-                  isDisabled={meta.isDisabled}
-                  flex={1}
-                  borderRadius="xl"
-                  textAlign="unset"
-                  padding={4}
-                  gap={4}
-                  _selected={{
-                    borderColor: 'primary.a.500',
-
-                    strong: {
-                      bg: 'primary.a.500',
-
-                      _before: {
-                        borderColor: 'primary.a.500',
-                      },
-                    },
-                  }}
-                >
-                  <Box
-                    as="strong"
-                    position="relative"
-                    width={4}
-                    height={4}
-                    borderRadius="full"
-                    _before={{
-                      content: `''`,
-                      position: 'absolute',
-                      inset: 0,
-                      border: '0.0625rem solid',
-                      borderColor: 'shader.a.500',
-                      borderRadius: 'inherit',
-                      transform: 'scale(1.4)',
-                    }}
-                  />
-
-                  <Box width={36}>
-                    <Text
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="shader.a.900"
-                    >
-                      {meta.heading}
-                    </Text>
-
-                    <Text as="span" fontSize="xs" color="shader.a.600">
-                      {meta.body}
-                    </Text>
-                  </Box>
-                </Tab>
-              ))}
-            </TabList>
-
-            <TabPanels>
-              {ListTab.map(meta => (
-                <TabPanel key={meta.id} padding={0}>
-                  {meta.id === tab ? meta.submit : null}
-                </TabPanel>
-              ))}
-            </TabPanels>
-          </Tabs>
+          <AccountOwnerModalTab onSuccess={onSuccess} formState={formState} />
         </ModalBody>
       </ModalContent>
     </Modal>

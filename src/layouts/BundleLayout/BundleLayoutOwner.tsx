@@ -7,24 +7,15 @@ interface BundleLayoutOwnerProps {
   sx?: HeadingProps;
 }
 
-export default function BundleLayoutOwner({
-  owner,
-  sx,
-}: BundleLayoutOwnerProps) {
+export default ({ owner, sx }: BundleLayoutOwnerProps) => {
   const { account } = useAppSelector(state => state.injected.polkadot);
 
   return (
-    <Heading
-      fontSize="md"
-      fontWeight="normal"
-      color="shader.a.500"
-      mb={6}
-      {...sx}
-    >
+    <Heading fontSize="sm" fontWeight="medium" color="shader.a.600" {...sx}>
       Owned by&nbsp;
       <Text as="span" color="primary.a.500" fontWeight="medium">
         {account?.address === owner ? 'You' : shorten(owner)}
       </Text>
     </Heading>
   );
-}
+};

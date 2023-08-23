@@ -5,12 +5,10 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useRef } from 'react';
 
-import { cloundinary_link } from 'axios/cloudinary_axios';
 import { Link } from 'react-router-dom';
 
 import RatioPicture from 'components/RatioPicture';
 
-import useMetaNFT from 'hooks/useMetaNFT';
 import CardBox from 'components/CardBox';
 import DateBlock from 'components/DateBlock';
 import GafiAmount from 'components/GafiAmount';
@@ -20,40 +18,65 @@ import TopBundlesSkeleton from './TopBundlesSkeleton';
 import useBundleOf from 'hooks/useBundleOf';
 import useTradeConfigOf from 'hooks/useTradeConfigOf';
 
+interface TopBundlesServiceProps {
+  bundleOf: {
+    trade_id: number;
+    collection_id: number;
+    nft_id: number;
+    amount: number;
+  }[];
+}
+
 export default function TopBundles() {
-  const { bundleOf } = useBundleOf({
+  const { bundleOf, isLoading } = useBundleOf({
     key: 'topBundle',
     filter: 'entries',
   });
-
-  const { tradeConfigOf, isLoading } = useTradeConfigOf({
-    key: 'topBundle',
-    filter: bundleOf?.map(meta => meta?.trade_id) as keyof typeof bundleOf,
-    type: 'isBundle',
-  });
-
-  const { metaNFT } = useMetaNFT({
-    key: `topBundle/${JSON.stringify(bundleOf)}`,
-    filter: 'collection_id',
-    arg: bundleOf?.map(({ collection_id, nft_id }) => ({
-      collection_id,
-      nft_id,
-    })),
-  });
-
-  const swiperRef = useRef<SwiperType>();
 
   if (isLoading) return <TopBundlesSkeleton />;
 
   return (
     <>
-      {bundleOf?.length && tradeConfigOf?.length ? (
+      {bundleOf?.length ? (
+        <TopBundlesService bundleOf={bundleOf} />
+      ) : (
+        <Center>Empty</Center>
+      )}
+    </>
+  );
+}
+
+function TopBundlesService({ bundleOf }: TopBundlesServiceProps) {
+  const { tradeConfigOf } = useTradeConfigOf({
+    key: 'topBundle',
+    filter: 'trade_id',
+    arg: bundleOf.map(meta => meta.trade_id),
+  });
+
+  const getOnlyBundle = tradeConfigOf
+    ?.map(meta => {
+      if (meta?.trade.isBundle) {
+        return {
+          trade_id: meta.trade_id,
+          maybePrice: meta.maybePrice,
+          owner: meta.owner,
+          endBlock: meta.endBlock,
+        };
+      }
+    })
+    .filter((meta): meta is NonNullable<typeof meta> => !!meta);
+
+  const swiperRef = useRef<SwiperType>();
+
+  return (
+    <>
+      {getOnlyBundle?.length ? (
         <Box position="relative" role="group">
           <SwiperThumbsButton
             swiperRef={swiperRef}
             sx={{
-              _first: { left: '-3%' },
-              _last: { right: '-3%' },
+              _first: { left: '-2%' },
+              _last: { right: '-2%' },
             }}
           />
 
@@ -71,16 +94,10 @@ export default function TopBundles() {
               1280: { slidesPerView: 4 },
             }}
           >
-            {tradeConfigOf.map((meta, index) => {
-              const currentMetaNFT = metaNFT?.find(
-                data =>
-                  data?.collection_id === bundleOf[index]?.collection_id &&
-                  data?.nft_id === bundleOf[index]?.nft_id
-              );
-
+            {getOnlyBundle.map(meta => {
               return (
-                <SwiperSlide key={meta?.trade_id}>
-                  <Link to={`/bundle/${meta?.trade_id}`}>
+                <SwiperSlide key={meta.trade_id}>
+                  <Link to={`/bundle/${meta.trade_id}`}>
                     <CardBox variant="baseStyle" padding={0}>
                       <Box
                         padding={2}
@@ -88,12 +105,8 @@ export default function TopBundles() {
                         borderColor="shader.a.200"
                       >
                         <RatioPicture
-                          alt={`topBundle/${meta?.trade_id}`}
-                          src={
-                            currentMetaNFT?.image
-                              ? cloundinary_link(currentMetaNFT.image)
-                              : null
-                          }
+                          alt={`topBundle/${meta.trade_id}`}
+                          src={null}
                         />
                       </Box>
 
@@ -105,13 +118,13 @@ export default function TopBundles() {
                       >
                         <Center justifyContent="space-between">
                           <Text as="strong" fontWeight="inherit" fontSize="md">
-                            {currentMetaNFT?.title || '-'}
+                            -
                           </Text>
 
                           <Text color="shader.a.600">
                             ID:
                             <Text as="span" color="shader.a.900">
-                              {meta?.trade_id}
+                              {meta.trade_id}
                             </Text>
                           </Text>
                         </Center>
@@ -122,7 +135,7 @@ export default function TopBundles() {
 
                             <DateBlock
                               endBlock={
-                                meta?.endBlock?.isSome
+                                meta.endBlock.isSome
                                   ? meta.endBlock.value.toNumber()
                                   : -1
                               }
@@ -135,7 +148,7 @@ export default function TopBundles() {
 
                             <GafiAmount
                               amount={
-                                meta?.maybePrice?.isSome
+                                meta.maybePrice.isSome
                                   ? meta.maybePrice.value.toHuman()
                                   : 0
                               }
@@ -159,9 +172,7 @@ export default function TopBundles() {
             })}
           </Swiper>
         </Box>
-      ) : (
-        <Center>Empty</Center>
-      )}
+      ) : null}
     </>
   );
 }

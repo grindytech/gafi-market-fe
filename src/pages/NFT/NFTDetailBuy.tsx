@@ -36,7 +36,7 @@ interface NFTDetailBuyProps {
   fee: number;
   amount: number;
   sx?: ButtonProps;
-  refetch?: () => void;
+  refetch: () => void;
 }
 
 export default function NFTDetailBuy({
@@ -59,12 +59,14 @@ export default function NFTDetailBuy({
 
   const { metaNFT } = useMetaNFT({
     key: `nft_detail/${nft_id}/${collection_id}`,
-    filter: [{ nft_id: Number(nft_id), collection_id: Number(collection_id) }],
+    filter: 'collection_id',
+    arg: [{ nft_id: Number(nft_id), collection_id: Number(collection_id) }],
   });
 
   const { MetaCollection } = useMetaCollection({
     key: `nft_detail/${nft_id}/${collection_id}`,
-    filter: [Number(collection_id)],
+    filter: 'collection_id',
+    arg: [Number(collection_id)],
   });
 
   const { isLoading, mutation } = useItemBought({
@@ -72,9 +74,7 @@ export default function NFTDetailBuy({
     amount: watch().amount,
     bidPrice: amount * fee,
     refetch() {
-      if (refetch) {
-        refetch();
-      }
+      refetch();
       onClose();
     },
   });

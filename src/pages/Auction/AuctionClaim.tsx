@@ -15,23 +15,20 @@ export default function AuctionClaim() {
   });
 
   return (
-    <>
-      <Button
-        borderRadius="3xl"
-        width="fit-content"
-        px={10}
-        py={6}
-        _hover={{}}
-        isLoading={isLoading}
-        onClick={() => {
-          if (api) {
-            mutation(api.tx.game.claimAuction(Number(id)));
-          }
-        }}
-        variant="primary"
-      >
-        Claim Auction
-      </Button>
-    </>
+    <Button
+      variant="primary"
+      borderRadius="3xl"
+      width="fit-content"
+      px={10}
+      py={6}
+      isLoading={isLoading}
+      onClick={() => {
+        if (api) {
+          mutation(api.tx.game.claimAuction(Number(id)));
+        }
+      }}
+    >
+      Claim Auction
+    </Button>
   );
 }

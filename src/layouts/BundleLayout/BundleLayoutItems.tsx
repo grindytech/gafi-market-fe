@@ -1,64 +1,50 @@
 import { Box, Center, Flex, Text } from '@chakra-ui/react';
-import { cloundinary_link } from 'axios/cloudinary_axios';
-import RatioPicture from 'components/RatioPicture';
 import useMetaCollection from 'hooks/useMetaCollection';
 import useMetaNFT from 'hooks/useMetaNFT';
 import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper/types';
-
 import { Thumbs } from 'swiper';
-import CardBox from 'components/CardBox';
+import RatioPicture from 'components/RatioPicture';
+import { cloundinary_link } from 'axios/cloudinary_axios';
 
 interface BundleLayoutItemsProps {
   queryKey: string;
+  setThumbsSwiper: React.Dispatch<SwiperType>;
   bundleOf: {
-    trade_id: number;
     collection_id: number;
     nft_id: number;
     amount: number;
   }[];
-  setThumbsSwiper: React.Dispatch<SwiperType>;
-  heading: string;
 }
 
-export default function BundleLayoutItems({
+export default ({
   queryKey,
-  bundleOf,
   setThumbsSwiper,
-  heading,
-}: BundleLayoutItemsProps) {
+  bundleOf,
+}: BundleLayoutItemsProps) => {
   const { MetaCollection } = useMetaCollection({
     key: queryKey,
-    filter: bundleOf.map(({ collection_id }) => collection_id),
+    filter: 'collection_id',
+    arg: bundleOf.map(({ collection_id }) => collection_id),
   });
 
   const { metaNFT } = useMetaNFT({
     key: queryKey,
-    filter: bundleOf.map(({ collection_id, nft_id }) => ({
+    filter: 'collection_id',
+    arg: bundleOf.map(({ collection_id, nft_id }) => ({
       collection_id,
       nft_id,
     })),
   });
 
   return (
-    <CardBox variant="baseStyle" padding={0} color="shader.a.900">
-      <Text
-        py={5}
-        px={6}
-        fontWeight="medium"
-        borderBottom="0.0625rem solid"
-        borderColor="shader.a.200"
-      >
-        {heading}&nbsp;
-        <Text as="span" color="shader.a.500" fontSize="sm">
-          {bundleOf.length} Items
-        </Text>
+    <Box>
+      <Text as="span" fontSize="sm" color="shader.a.600" mb={4}>
+        {bundleOf.length} Items
       </Text>
 
       <Box
-        padding={6}
-        pt={4}
         sx={{
           '.swiper-slide-thumb-active': {
             '> div': { borderColor: 'primary.a.500' },
@@ -68,7 +54,6 @@ export default function BundleLayoutItems({
         <Swiper
           modules={[Thumbs]}
           slidesPerView={bundleOf.length}
-          mousewheel={{ forceToAxis: true }}
           onSwiper={setThumbsSwiper}
           direction="vertical"
         >
@@ -140,6 +125,6 @@ export default function BundleLayoutItems({
           )}
         </Swiper>
       </Box>
-    </CardBox>
+    </Box>
   );
-}
+};

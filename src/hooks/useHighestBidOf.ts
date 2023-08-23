@@ -5,14 +5,19 @@ import { ITuple } from '@polkadot/types/types';
 import { AccountId32 } from '@polkadot/types/interfaces';
 
 export interface useHighestBidOfProps {
-  filter: 'entries' | number[];
+  filter: 'entries' | 'trade_id';
+  arg?: number[];
   key: string | string[] | number | number[];
 }
 
-export default function useHighestBidOf({ filter, key }: useHighestBidOfProps) {
+export default function useHighestBidOf({
+  filter,
+  arg,
+  key,
+}: useHighestBidOfProps) {
   const { api } = useAppSelector(state => state.substrate);
 
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ['highestBidOf', key],
     queryFn: async () => {
       if (api) {
@@ -35,9 +40,9 @@ export default function useHighestBidOf({ filter, key }: useHighestBidOfProps) {
           );
         }
 
-        if (filter) {
+        if (filter === 'trade_id' && arg) {
           return Promise.all(
-            filter.map(async trade_id => {
+            arg.map(async trade_id => {
               const service = (await api.query.game.highestBidOf(
                 trade_id
               )) as Option<ITuple<[AccountId32, u128]>>;
@@ -57,10 +62,11 @@ export default function useHighestBidOf({ filter, key }: useHighestBidOfProps) {
       // not found group
       return [];
     },
-    enabled: !!filter,
+    enabled: !!api?.query.game.highestBidOf || !!arg,
   });
 
   return {
     highestBidOf: data,
+    refetch,
   };
 }

@@ -4,8 +4,8 @@ import { Option, StorageKey, u32 } from '@polkadot/types';
 import { PalletNftsItemDetails } from '@polkadot/types/lookup';
 
 interface useNFTsItemProps {
-  filter?: 'entries' | 'collection_id';
-  arg?: number[];
+  filter?: 'entries' | 'collection_id' | 'nft_id';
+  arg?: number[] | number[][];
   key: string | string[] | number | number[];
 }
 
@@ -32,7 +32,9 @@ export default function useNFTsItem({ filter, key, arg }: useNFTsItemProps) {
 
         if (filter === 'collection_id' && arg) {
           return Promise.all(
-            arg.map(async collection_id => {
+            arg.map(async option => {
+              const collection_id = option as number;
+
               const service = await api.query.nfts.item.entries(collection_id);
 
               return service.map(
@@ -50,11 +52,30 @@ export default function useNFTsItem({ filter, key, arg }: useNFTsItemProps) {
             })
           ).then(data => data.flat());
         }
+
+        if (filter === 'nft_id' && arg) {
+          return Promise.all(
+            arg.map(async option => {
+              const [collection_id, nft_id] = option as number[];
+
+              const service = (await api.query.nfts.item(
+                nft_id,
+                collection_id
+              )) as Option<PalletNftsItemDetails>;
+
+              return {
+                collection_id,
+                nft_id,
+                owner: service.value.owner.toString(),
+              };
+            })
+          );
+        }
       }
 
       // return []; // not found
     },
-    enabled: !!filter || !!arg,
+    enabled: !!api?.query.nfts.item || !!arg,
   });
 
   return {
