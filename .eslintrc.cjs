@@ -56,6 +56,9 @@ module.exports = {
     // disabled react-refresh of vite
     'react-refresh/only-export-components': 'off',
 
+    // (allow export default none name) export default = () => {}
+    'react/display-name': 'off',
+
     // format for project
     'prettier/prettier': [
       'error',

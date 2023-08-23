@@ -31,6 +31,7 @@ export const colors = {
       700: '#3F3F46',
       800: '#27272A',
       900: '#18181B',
+      1000: '#18181B',
     },
   },
   second: {
@@ -93,6 +94,11 @@ const CardBox: ComponentStyleConfig = {
 
 const Button: ComponentStyleConfig = {
   variants: {
+    unstyled: {
+      minWidth: 'auto',
+      height: 'auto',
+      display: 'flex',
+    },
     primary: {
       px: 4,
       bg: 'primary.a.500',
