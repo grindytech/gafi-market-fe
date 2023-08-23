@@ -7,7 +7,7 @@ import {
 } from '@polkadot/types/lookup';
 import { GafiSupportGameTypesPackage } from '@polkadot/types/lookup';
 
-interface tradeConfigProps {
+export interface tradeConfigProps {
   trade_id: number;
   trade: GafiSupportGameTypesTradeType;
   owner: string;

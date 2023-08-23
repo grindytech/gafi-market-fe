@@ -6,6 +6,7 @@ import React from 'react';
 import AccountInformation from './AccountInformation';
 import AccountOwner from './AccountOwner';
 import AccountActivitys from './AccountActivitys';
+import AccountWishlist from './AccountWishlist';
 
 export default function Account() {
   const [tab, setTab] = React.useState(0);
@@ -20,6 +21,11 @@ export default function Account() {
       id: 1,
       tab: 'Activitys',
       panel: <AccountActivitys />,
+    },
+    {
+      id: 2,
+      tab: 'Wishlist',
+      panel: <AccountWishlist />,
     },
   ];
 

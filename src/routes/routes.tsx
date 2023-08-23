@@ -13,6 +13,7 @@ import NFT from 'pages/NFT';
 import Blockchain, { ListBlockchain } from 'pages/Blockchain';
 import AccountSwap from 'pages/Account/AccountSwap';
 import Swap from 'pages/Swap';
+import Wishlist from 'pages/Wishlist';
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: 'swap/:id',
         element: <Swap />,
+      },
+      {
+        path: 'wishlist/:id',
+        element: <Wishlist />,
       },
       {
         path: 'collection/:collection_id',

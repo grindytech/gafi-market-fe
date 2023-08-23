@@ -2,32 +2,17 @@ import {
   Box,
   Button,
   Center,
-  CircularProgress,
   Container,
   Grid,
   Icon,
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
+import { cloundinary_link } from 'axios/cloudinary_axios';
 import RatioPicture from 'components/RatioPicture';
-
-import { useEffect } from 'react';
-import {
-  SetURLSearchParams,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom';
-
-import BlockIcon from 'public/assets/line/block.svg';
-
-import AccountOwnerMenu from './AccountOwnerMenu';
+import { ItemBalanceOfProps } from 'hooks/useItemBalanceOf';
 import useMetaCollection from 'hooks/useMetaCollection';
 import useMetaNFT from 'hooks/useMetaNFT';
-import { cloundinary_link } from 'axios/cloudinary_axios';
-
-import { colors } from 'theme/theme';
-import { hexToString } from '@polkadot/util';
-import AccountOwnerModal from './AccountOwnerModal';
 import {
   Control,
   UseFormReset,
@@ -36,10 +21,24 @@ import {
   useForm,
 } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { WISHLIST_STORAGE_KEY } from 'utils/constants';
+import BlockIcon from 'public/assets/line/block.svg';
+import { colors } from 'theme/theme';
 import { convertHex } from 'utils/utils';
-import useItemBalanceOf, { ItemBalanceOfProps } from 'hooks/useItemBalanceOf';
+import AccountWishlistMenu from './AccountWishlistMenu';
+import useForceMount from 'hooks/useForceMount';
+import AccountWishlistModal from './AccountWishlistModal';
 
-export interface AccountOwnerFieldProps {
+interface AccountWishlistServiceProps {
+  getWishlist: ItemBalanceOfProps[];
+  setValue: UseFormSetValue<AccountWishlistFieldProps>;
+  reset: UseFormReset<AccountWishlistFieldProps>;
+  control: Control<AccountWishlistFieldProps, any>;
+  watch: UseFormWatch<AccountWishlistFieldProps>;
+}
+
+export interface AccountWishlistFieldProps {
   price: number;
   selected?: number[];
   product?: {
@@ -49,106 +48,58 @@ export interface AccountOwnerFieldProps {
   }[];
 }
 
-interface AccountOwnerServiceProps {
-  itemBalanceOf: ItemBalanceOfProps[];
+export default () => {
+  const wishlist_storage = localStorage.getItem(WISHLIST_STORAGE_KEY);
 
-  // react-form
-  setValue: UseFormSetValue<AccountOwnerFieldProps>;
-  reset: UseFormReset<AccountOwnerFieldProps>;
-  control: Control<AccountOwnerFieldProps, any>;
-  watch: UseFormWatch<AccountOwnerFieldProps>;
+  const getWishlist: ItemBalanceOfProps[] = wishlist_storage
+    ? JSON.parse(wishlist_storage)
+    : [];
 
-  // query
-  setSearchParams: SetURLSearchParams;
-  searchParams: URLSearchParams;
-}
-
-export default function AccountOwner() {
-  const { address } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const select_nft = searchParams.get('select_nft');
-
-  const { itemBalanceOf, isLoading } = useItemBalanceOf({
-    key: `account/${address}`,
-    filter: 'address',
-    arg: [address as string],
-  });
-
-  const { setValue, reset, control, watch } = useForm<AccountOwnerFieldProps>();
-
-  // select by query
-  useEffect(() => {
-    if (select_nft) {
-      const parse_select: string[] = JSON.parse(hexToString(select_nft));
-
-      parse_select.forEach((meta, index) => {
-        const [collection_id, nft_id] = meta.split('/');
-
-        const found_select = itemBalanceOf?.find(
-          data =>
-            data.collection_id === Number(collection_id) &&
-            data.nft_id === Number(nft_id)
-        );
-
-        setValue(`product.${index}`, found_select as never);
-      });
-    }
-  }, [searchParams, itemBalanceOf]);
-
-  if (isLoading)
-    return (
-      <Center height="100vh">
-        <CircularProgress isIndeterminate color="second.purple" />
-      </Center>
-    );
+  const { setValue, reset, control, watch } =
+    useForm<AccountWishlistFieldProps>();
 
   return (
     <>
-      {itemBalanceOf?.length ? (
-        <AccountOwnerService
-          itemBalanceOf={itemBalanceOf}
-          // query
-          searchParams={searchParams}
-          setSearchParams={setSearchParams}
-          // formControl
+      {getWishlist?.length ? (
+        <AccountWishlistService
+          getWishlist={getWishlist}
           setValue={setValue}
+          reset={reset}
           control={control}
           watch={watch}
-          reset={reset}
         />
       ) : (
         <Center>Empty</Center>
       )}
     </>
   );
-}
+};
 
-function AccountOwnerService({
-  itemBalanceOf,
+function AccountWishlistService({
+  getWishlist,
   setValue,
+  reset,
   control,
   watch,
-  reset,
-  searchParams,
-  setSearchParams,
-}: AccountOwnerServiceProps) {
+}: AccountWishlistServiceProps) {
   const { product } = watch();
   const { address } = useParams();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { setMounting } = useForceMount();
 
   const { metaNFT } = useMetaNFT({
-    key: `account/${address}`,
+    key: `account_wishlist/${address}`,
     filter: 'collection_id',
-    arg: itemBalanceOf?.map(({ collection_id, nft_id }) => ({
+    arg: getWishlist.map(({ collection_id, nft_id }) => ({
       collection_id,
       nft_id,
     })),
   });
 
   const { MetaCollection } = useMetaCollection({
-    key: `account/${address}`,
+    key: `account_wishlist/${address}`,
     filter: 'collection_id',
-    arg: itemBalanceOf.map(({ collection_id }) => collection_id),
+    arg: getWishlist.map(({ collection_id }) => collection_id),
   });
 
   const isSelected = Object.values(product || []).filter(meta => !!meta).length;
@@ -164,7 +115,7 @@ function AccountOwnerService({
         }}
         gap={4}
       >
-        {itemBalanceOf.map((meta, index) => {
+        {getWishlist.map((meta, index) => {
           const currentMetaNFT = metaNFT?.find(
             data =>
               data?.collection_id === meta.collection_id &&
@@ -269,7 +220,13 @@ function AccountOwnerService({
                 </Center>
               </Box>
 
-              <AccountOwnerMenu index={index} setValue={setValue} meta={meta} />
+              <AccountWishlistMenu
+                index={index}
+                setValue={setValue}
+                getWishlist={getWishlist}
+                meta={meta}
+                refetch={setMounting}
+              />
             </Box>
           );
         })}
@@ -296,14 +253,14 @@ function AccountOwnerService({
             variant="primary"
             px={6}
             _hover={{}}
-            bg={isSelected >= 2 ? 'shader.a.900' : undefined}
+            bg="shader.a.1000"
             onClick={onOpen}
           >
-            {isSelected >= 2 ? 'Sell Bundles' : 'Sell Now'}
+            Create wishlist
           </Button>
 
           {isOpen && (
-            <AccountOwnerModal
+            <AccountWishlistModal
               onClose={onClose}
               onSuccess={() => {
                 onClose();
@@ -311,9 +268,21 @@ function AccountOwnerService({
                 // reset react-form-hook
                 reset();
 
-                // reset query
-                searchParams.delete('select_nft');
-                setSearchParams(searchParams);
+                const filter = getWishlist.filter(
+                  ({ collection_id, nft_id }) =>
+                    !product?.some(
+                      meta =>
+                        meta.collection_id === collection_id &&
+                        meta.nft_id === nft_id
+                    )
+                );
+
+                localStorage.setItem(
+                  WISHLIST_STORAGE_KEY,
+                  JSON.stringify(filter)
+                );
+
+                setMounting();
               }}
               formState={{
                 control,
