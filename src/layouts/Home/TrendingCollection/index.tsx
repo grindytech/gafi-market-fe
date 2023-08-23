@@ -57,7 +57,6 @@ export default function TrendingCollection() {
               0: { slidesPerView: 1, grid: { rows: 2 } },
               480: { slidesPerView: 2, grid: { rows: 2 } },
               768: { slidesPerView: 3 },
-              1280: { slidesPerView: 3.1 },
             }}
           >
             {NFTsCollection.map(({ collection_id }) => {

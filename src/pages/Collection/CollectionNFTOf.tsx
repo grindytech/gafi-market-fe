@@ -25,10 +25,16 @@ import useMetaNFT from 'hooks/useMetaNFT';
 import RatioPicture from 'components/RatioPicture';
 import useNFTsItem from 'hooks/useNFTsItem';
 
+interface CollectionNFTOfServiceProps {
+  NFTsItem: {
+    collection_id: number;
+    nft_id: number;
+    owner: string;
+  }[];
+}
+
 export default function CollectionNFTOf() {
   const { collection_id } = useParams();
-
-  const { isOpen, onToggle } = useDisclosure();
 
   const { NFTsItem } = useNFTsItem({
     key: `collection_detail_of/${collection_id}`,
@@ -36,8 +42,19 @@ export default function CollectionNFTOf() {
     arg: [Number(collection_id)],
   });
 
+  return (
+    <>
+      {NFTsItem?.length ? <CollectionNFTOfService NFTsItem={NFTsItem} /> : null}
+    </>
+  );
+}
+
+function CollectionNFTOfService({ NFTsItem }: CollectionNFTOfServiceProps) {
+  const { isOpen, onToggle } = useDisclosure();
+  const { collection_id } = useParams();
+
   const { metaNFT } = useMetaNFT({
-    key: `collection_detail_of/${collection_id}/${JSON.stringify(NFTsItem)}`,
+    key: `collection_detail_of/${collection_id}`,
     filter: 'collection_id',
     arg: NFTsItem?.map(({ collection_id, nft_id }) => ({
       collection_id,
@@ -130,36 +147,22 @@ export default function CollectionNFTOf() {
                         alt={meta.nft_id}
                       />
 
-                      <Box padding={4}>
-                        <Center justifyContent="space-between">
+                      <Center justifyContent="space-between" padding={4}>
+                        <Text color="shader.a.900" fontWeight="medium">
+                          {currentMetaNFT?.title || '-'}
+                        </Text>
+
+                        <Text color="shader.a.500">
+                          ID:&nbsp;
                           <Text
-                            fontSize="sm"
+                            as="span"
+                            color="primary.a.500"
                             fontWeight="medium"
-                            color="shader.a.600"
                           >
-                            Collection ID
+                            {meta.nft_id}
                           </Text>
-
-                          <Text>{meta.collection_id}</Text>
-                        </Center>
-
-                        <Center justifyContent="space-between">
-                          <Text color="shader.a.900" fontWeight="medium">
-                            {currentMetaNFT?.title || '-'}
-                          </Text>
-
-                          <Text color="shader.a.500">
-                            ID:&nbsp;
-                            <Text
-                              as="span"
-                              color="primary.a.500"
-                              fontWeight="medium"
-                            >
-                              {meta.nft_id}
-                            </Text>
-                          </Text>
-                        </Center>
-                      </Box>
+                        </Text>
+                      </Center>
                     </Box>
                   );
                 })
