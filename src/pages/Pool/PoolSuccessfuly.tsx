@@ -13,90 +13,73 @@ import {
   Text,
 } from '@chakra-ui/react';
 import RatioPicture from 'components/RatioPicture';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import useSubscribeSystem from 'hooks/useSubscribeSystem';
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import useMetaNFT from 'hooks/useMetaNFT';
 import { cloundinary_link } from 'axios/cloudinary_axios';
 import StartIcon from 'public/assets/line/start.svg';
 import { stringToHex } from '@polkadot/util';
 import { useAppSelector } from 'hooks/useRedux';
 import SuccessIcon from 'public/assets/Illustration/success.svg';
+import { TypeMetadataOfItem } from 'types';
 
 interface PoolSuccessfulyProps {
-  onCloseSuccess: () => void;
+  onClose: () => void;
+  metaNFT: TypeMetadataOfItem[] | undefined;
 }
 
-interface metaProps {
+interface getNFTProps {
   nft_id: number;
   collection_id: number;
   amount?: number;
 }
-
-export default function PoolSuccessfuly({
-  onCloseSuccess,
-}: PoolSuccessfulyProps) {
+export default ({ onClose, metaNFT }: PoolSuccessfulyProps) => {
   const { event, setEvent } = useSubscribeSystem('game::Minted');
-  const [getNFT, setGetNFT] = React.useState<metaProps[]>([]);
+  const [getNFT, setGetNFT] = React.useState<getNFTProps[]>([]);
   const { account } = useAppSelector(state => state.injected.polkadot);
-  const { id } = useParams();
 
   const navigate = useNavigate();
 
-  React.useLayoutEffect(() => {
-    const subscribe = () => {
-      if (event) {
-        event.forEach(({ eventValue }) => {
-          const who: string = JSON.parse(eventValue)[1];
-          const meta = JSON.parse(eventValue)[3];
-          const sums: Partial<metaProps> = {};
+  useEffect(() => {
+    if (event) {
+      event.forEach(({ eventValue }) => {
+        const who: string = JSON.parse(eventValue)[1];
+        const meta = JSON.parse(eventValue)[3];
+        const sums: Partial<getNFTProps> = {};
 
-          meta.forEach(
-            ({ item, collection }: { item: number; collection: number }) => {
-              const key = `${collection}/${item}` as keyof typeof sums;
-              const notFound = 0;
+        meta.forEach(
+          ({ item, collection }: { item: number; collection: number }) => {
+            const key = `${collection}/${item}` as keyof typeof sums;
+            const notFound = 0;
 
-              // unique key object { 0/10: n++ } this collection/nft_id: amount
-              sums[key] = (sums[key] || notFound) + 1;
-            }
-          );
-
-          const getMinted = Object.entries(sums).map(data => {
-            const [collection, item] = data[0].split('/');
-
-            return {
-              collection_id: Number(collection),
-              nft_id: Number(item),
-              amount: data[1],
-            };
-          });
-
-          if (account?.address === who) {
-            setGetNFT(getMinted);
+            // unique key object { 0/10: n++ } this collection/nft_id: amount
+            sums[key] = (sums[key] || notFound) + 1;
           }
+        );
 
-          setEvent([]);
+        const getMinted = Object.entries(sums).map(data => {
+          const [collection, item] = data[0].split('/');
+
+          return {
+            collection_id: Number(collection),
+            nft_id: Number(item),
+            amount: data[1],
+          };
         });
-      }
-    };
 
-    subscribe();
+        if (account?.address === who) {
+          setGetNFT(getMinted);
+        }
 
-    return () => subscribe();
+        setEvent([]);
+      });
+    }
   }, [event]);
 
-  const { metaNFT } = useMetaNFT({
-    key: id,
-    group: getNFT?.map(item => ({
-      collection_id: item.collection_id,
-      nft_id: item.nft_id,
-    })),
-  });
-
   return (
-    <Modal isOpen={true} onClose={onCloseSuccess} size="2xl">
+    <Modal isOpen={true} onClose={onClose} size="2xl">
       <ModalOverlay />
 
       <ModalContent borderRadius="2xl">
@@ -203,16 +186,11 @@ export default function PoolSuccessfuly({
             Sell now
           </Button>
 
-          <Button
-            px={12}
-            borderRadius="xl"
-            variant="cancel"
-            onClick={onCloseSuccess}
-          >
+          <Button px={12} borderRadius="xl" variant="cancel" onClick={onClose}>
             Close
           </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
   );
-}
+};
