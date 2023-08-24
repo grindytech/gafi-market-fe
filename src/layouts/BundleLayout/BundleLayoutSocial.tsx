@@ -6,6 +6,11 @@ import ShareIcon from 'public/assets/line/share.svg';
 export default () => {
   return (
     <List
+      position="absolute"
+      transform="translateY(-100%)"
+      zIndex="docked"
+      bg="white"
+      inset="auto 0 auto 0"
       padding={6}
       display="flex"
       fontWeight="medium"
