@@ -12,7 +12,7 @@ export default ({ trade_id, maybePrice }: WishlistClaimProps) => {
   const { api } = useAppSelector(state => state.substrate);
 
   const { mutation, isLoading } = useSignAndSend({
-    key: [''],
+    key: [`clam_wislist_detail/${trade_id}`],
     address: account?.address as string,
     onSuccess: () => {},
   });
@@ -20,8 +20,7 @@ export default ({ trade_id, maybePrice }: WishlistClaimProps) => {
   return (
     <Button
       variant="primary"
-      px={6}
-      py={4}
+      padding={6}
       borderRadius="3xl"
       isLoading={isLoading}
       onClick={() => {

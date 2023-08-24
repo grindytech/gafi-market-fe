@@ -111,17 +111,14 @@ function WishlistService({ tradeConfigOf, bundleOf }: WishlistServiceProps) {
               />
 
               <Flex gap={2} padding={6} pt={0}>
-                {tradeConfigOf[0].owner === account?.address ? (
+                {tradeConfigOf[0].owner === account?.address && (
                   <WishlistClaim
                     trade_id={tradeConfigOf[0].trade_id}
                     maybePrice={tradeConfigOf[0].maybePrice.value.toNumber()}
                   />
-                ) : (
-                  <WishlistCancel
-                    trade_id={tradeConfigOf[0].trade_id}
-                    maybePrice={tradeConfigOf[0].maybePrice.value.toNumber()}
-                  />
                 )}
+
+                <WishlistCancel trade_id={tradeConfigOf[0].trade_id} />
               </Flex>
             </CardBox>
 

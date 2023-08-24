@@ -4,15 +4,14 @@ import useSignAndSend from 'hooks/useSignAndSend';
 
 interface WishlistCancelProps {
   trade_id: number;
-  maybePrice: number;
 }
 
-export default ({ trade_id, maybePrice }: WishlistCancelProps) => {
+export default ({ trade_id }: WishlistCancelProps) => {
   const { account } = useAppSelector(state => state.injected.polkadot);
   const { api } = useAppSelector(state => state.substrate);
 
   const { mutation, isLoading } = useSignAndSend({
-    key: [''],
+    key: [`cancel_wishlist_detail/${trade_id}`],
     address: account?.address as string,
     onSuccess() {},
   });
@@ -20,12 +19,12 @@ export default ({ trade_id, maybePrice }: WishlistCancelProps) => {
   return (
     <Button
       variant="cancel"
-      px={6}
+      padding={6}
       borderRadius="3xl"
       isLoading={isLoading}
       onClick={() => {
         if (api) {
-          mutation(api.tx.game.claimWishlist(trade_id, maybePrice));
+          mutation(api.tx.game.cancelTrade(trade_id, 'Wishlist'));
         }
       }}
     >
