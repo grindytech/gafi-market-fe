@@ -81,9 +81,17 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxMintItem: u32 & AugmentedConst<ApiType>;
       /**
-       * The basic amount of funds that must be reserved for a mining pool.
+       * Maximum number of minting requests per block.
+       **/
+      maxMintRequest: u32 & AugmentedConst<ApiType>;
+      /**
+       * The basic amount of funds that must be reserved for a minting pool.
        **/
       miningPoolDeposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * Number of blocks of cooldown required to process minting requests.
+       **/
+      mintInterval: u32 & AugmentedConst<ApiType>;
       /**
        * The basic amount of funds that must be reserved for any upgrade.
        **/

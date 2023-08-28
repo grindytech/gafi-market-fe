@@ -2848,7 +2848,7 @@
   optionalDependencies:
     "@substrate/connect" "0.7.26"
 
-"@polkadot/typegen@^10.9.1":
+"@polkadot/typegen@^10.6.1":
   version "10.9.1"
   resolved "https://registry.yarnpkg.com/@polkadot/typegen/-/typegen-10.9.1.tgz#fe509b4f1a1f9094120daac819e9e0c378bca036"
   integrity sha512-SbG9U8/POyY8QwQUp70qzTnYsRxc6Rrjt4wzIWsBKmzVRy0i19O23EXSUo+81ukOBiLZj551GAJwRa3YBpdR+A==
@@ -9488,10 +9488,10 @@ typed-array-length@^1.0.4:
     for-each "^0.3.3"
     is-typed-array "^1.1.9"
 
-typescript@^5:
-  version "5.1.6"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.1.6.tgz#02f8ac202b6dad2c0dd5e0913745b47a37998274"
-  integrity sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==
+typescript@^5.1.0:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.2.tgz#5ebb5e5a5b75f085f22bc3f8460fba308310fa78"
+  integrity sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==
 
 ua-parser-js@^1.0.35:
   version "1.0.35"

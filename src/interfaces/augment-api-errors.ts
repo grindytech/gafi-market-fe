@@ -138,6 +138,7 @@ declare module '@polkadot/api-base/types/errors' {
       NotSwap: AugmentedError<ApiType>;
       NotWhitelisted: AugmentedError<ApiType>;
       NotWishlist: AugmentedError<ApiType>;
+      OverRequest: AugmentedError<ApiType>;
       PoolIdInUse: AugmentedError<ApiType>;
       SoldOut: AugmentedError<ApiType>;
       TradeEnded: AugmentedError<ApiType>;
