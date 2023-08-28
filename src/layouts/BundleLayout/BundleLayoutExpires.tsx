@@ -4,9 +4,10 @@ import DateBlock from 'components/DateBlock';
 interface BundleLayoutExpiresProps {
   heading: string;
   endBlock: number;
+  end?: 'Expired' | 'Infinity';
 }
 
-export default ({ heading, endBlock }: BundleLayoutExpiresProps) => {
+export default ({ heading, end, endBlock }: BundleLayoutExpiresProps) => {
   return (
     <Text
       py={4}
@@ -19,6 +20,7 @@ export default ({ heading, endBlock }: BundleLayoutExpiresProps) => {
       {heading} ends&nbsp;
       <DateBlock
         endBlock={endBlock}
+        end={end}
         sx={{
           as: 'span',
           fontSize: 'md',

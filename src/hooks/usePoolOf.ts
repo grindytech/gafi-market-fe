@@ -4,12 +4,21 @@ import { useAppSelector } from './useRedux';
 import { Option, StorageKey, u32 } from '@polkadot/types';
 import { PalletGamePoolDetails } from '@polkadot/types/lookup';
 
+export interface poolOfProps {
+  pool_id: number;
+  poolType: string;
+  owner: string;
+  price: string;
+  endBlock: Option<u32>;
+}
+
 export interface usePoolOfProps {
-  filter: 'entries' | number[];
+  filter: 'entries' | 'pool_id';
+  arg?: number[];
   key: string | string[] | number | number[];
 }
 
-export default function usePoolOf({ filter, key }: usePoolOfProps) {
+export default function usePoolOf({ filter, arg, key }: usePoolOfProps) {
   const { api } = useAppSelector(state => state.substrate);
 
   const { data, isLoading } = useQuery({
@@ -32,12 +41,12 @@ export default function usePoolOf({ filter, key }: usePoolOfProps) {
                 endBlock: meta.value.mintSettings.endBlock,
               };
             }
-          );
+          ) as poolOfProps[];
         }
 
-        if (filter) {
+        if (filter === 'pool_id' && arg) {
           return Promise.all(
-            filter.map(async pool_id => {
+            arg.map(async pool_id => {
               const service = (await api.query.game.poolOf(
                 pool_id
               )) as Option<PalletGamePoolDetails>;
@@ -52,14 +61,14 @@ export default function usePoolOf({ filter, key }: usePoolOfProps) {
                 endBlock: service.value.mintSettings.endBlock,
               };
             })
-          );
+          ).then(data => data.filter((meta): meta is poolOfProps => !!meta));
         }
       }
 
       // not found group
       return [];
     },
-    enabled: !!filter,
+    enabled: !!api?.query.game.poolOf || !!arg,
   });
 
   return {

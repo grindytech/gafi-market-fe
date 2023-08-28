@@ -1,9 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
 
+export interface SupplyOfProps {
+  collection_id: number;
+  nft_id: number;
+  supply: string | null;
+}
+
 interface useSupplyOfProps {
   filter?: 'entries' | 'collection_id';
-  arg?: number[] | { collection_id?: number; nft_id?: number }[];
+  arg?: number[] | number[][];
   key: string | string[] | number | number[];
 }
 
@@ -21,27 +27,36 @@ export default function useSupplyOf({ filter, key, arg }: useSupplyOfProps) {
             return {
               collection_id: meta.args[0].toNumber(),
               nft_id: meta.args[1].toNumber(),
-              supply: supply.toHuman() as string | null,
+              supply: supply.toHuman(),
             };
-          });
+          }) as SupplyOfProps[];
         }
 
         if (filter === 'collection_id' && arg) {
-          for (let i = 0; i < arg.length; i++) {
-            const service = await api.query.game.supplyOf.entries(arg[i]);
+          return Promise.all(
+            arg.map(async option => {
+              const [collection_id, nft_id] = option as number[];
 
-            return service.map(([meta, supply]) => ({
-              collection_id: meta.args[0].toNumber(),
-              nft_id: meta.args[1].toNumber(),
-              supply: supply.toHuman() as string | null,
-            }));
-          }
+              const service = await api.query.game.supplyOf(
+                collection_id,
+                nft_id
+              );
+
+              // not found
+              if (service.isEmpty) return;
+
+              return {
+                collection_id,
+                nft_id,
+                supply: service.toHuman(),
+              };
+            })
+          ).then(data => data.filter((meta): meta is SupplyOfProps => !!meta));
         }
       }
 
       return []; // not found
     },
-    // enabled: !!filter || !!arg,
     enabled: !!api?.query.game.supplyOf || !!arg,
   });
 
