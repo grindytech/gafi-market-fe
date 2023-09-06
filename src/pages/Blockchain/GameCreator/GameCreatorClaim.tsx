@@ -47,6 +47,7 @@ export default function GameCreatorClaim() {
       <Button
         variant="unstyled"
         display="flex"
+        height={12}
         px={4}
         fontSize="sm"
         fontWeight="medium"
