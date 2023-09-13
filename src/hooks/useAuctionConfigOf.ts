@@ -1,12 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
-import { Option, StorageKey, u32 } from '@polkadot/types';
-import { PalletGameAuctionConfig } from '@polkadot/types/lookup';
+import { Option, u128, u32 } from '@polkadot/types';
 
 export interface useAuctionConfigOfProps {
   filter: 'entries' | 'trade_id';
   arg?: number[];
   key: string | string[] | number | number[];
+}
+
+export interface AuctionConfigOfProps {
+  trade_id: number;
+  owner: string;
+  maybePrice: Option<u128>;
+  startBlock: u32;
+  duration: u32;
 }
 
 export default function useAuctionConfigOf({
@@ -23,20 +30,15 @@ export default function useAuctionConfigOf({
         if (filter === 'entries') {
           const service = await api.query.game.auctionConfigOf.entries();
 
-          return service.map(
-            ([trade_id, meta]: [
-              StorageKey<[u32]>,
-              Option<PalletGameAuctionConfig>
-            ]) => {
-              return {
-                trade_id: trade_id.args[0].toNumber(),
-                owner: meta.value.owner.toString(),
-                maybePrice: meta.value.maybePrice,
-                startBlock: meta.value.startBlock,
-                duration: meta.value.duration,
-              };
-            }
-          );
+          return service.map(([trade_id, meta]) => {
+            return {
+              trade_id: trade_id.args[0].toNumber(),
+              owner: meta.value.owner.toString(),
+              maybePrice: meta.value.maybePrice,
+              startBlock: meta.value.startBlock,
+              duration: meta.value.duration,
+            };
+          }) as AuctionConfigOfProps[];
         }
 
         if (filter && arg) {
@@ -56,7 +58,7 @@ export default function useAuctionConfigOf({
               };
             })
           ).then(data =>
-            data.filter((meta): meta is NonNullable<typeof meta> => !!meta)
+            data.filter((meta): meta is AuctionConfigOfProps => !!meta)
           );
         }
       }

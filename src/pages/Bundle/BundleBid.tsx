@@ -24,7 +24,6 @@ export default function BundleBid({ maybePrice }: BundleBidProps) {
       width="fit-content"
       px={10}
       py={6}
-      _hover={{}}
       isLoading={isLoading}
       variant="primary"
       onClick={() => {

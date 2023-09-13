@@ -6,7 +6,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { ISubmittableResult } from '@polkadot/types/types';
 import useTxError from './useTxError';
 import { useState } from 'react';
-import { GAFI_WALLET_STORAGE_KEY } from 'utils/constants';
+import { GAFI_WALLET_STORAGE_KEY } from 'utils/contants.utils';
 
 interface useSignAndSendProps {
   address: string;

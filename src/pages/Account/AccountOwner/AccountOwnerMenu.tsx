@@ -22,11 +22,17 @@ import { UseFormSetValue } from 'react-hook-form';
 import { AccountOwnerFieldProps } from '.';
 import { ItemBalanceOfProps } from 'hooks/useItemBalanceOf';
 import React from 'react';
-import { WISHLIST_STORAGE_KEY } from 'utils/constants';
+import { WISHLIST_STORAGE_KEY } from 'utils/contants.utils';
 
 interface AccountOwnerMenuProps {
   setValue: UseFormSetValue<AccountOwnerFieldProps>;
-  meta: ItemBalanceOfProps;
+  meta: {
+    amount: number;
+    collection_id: number;
+    token_id: number;
+    image: string;
+    name: string;
+  };
   index: number;
 }
 

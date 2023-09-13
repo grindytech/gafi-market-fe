@@ -1,7 +1,7 @@
 import config from 'config';
-import { chainDecimal } from './constants';
 import { formatBalance } from '@polkadot/util';
 import { colors } from 'theme/theme';
+import { chainDecimal } from './contants.utils';
 
 /** 
   @function convertHex(color: string, opacity: number)
@@ -13,7 +13,7 @@ import { colors } from 'theme/theme';
         convert to 'base 16'
         the latest adding alpha  
 */
-export const convertHex = (color: string, opacity: number) => {
+export const convertHex = (color: string, opacity = 1) => {
   const hexColorToRGBA = `${parseInt(color.substring(1, 3), 16)}, ${parseInt(
     color.substring(3, 5),
     16
@@ -51,7 +51,7 @@ export const getInjectedWeb3 = async (extension: string) => {
 };
 
 export const formatGAFI = (fee: Parameters<typeof formatBalance>[0]) => {
-  const formatNumber = formatBalance(fee, {
+  const formatNumber = formatBalance(removeStringComma(String(fee)), {
     withSi: false,
     forceUnit: '-',
     decimals: chainDecimal,
@@ -61,55 +61,30 @@ export const formatGAFI = (fee: Parameters<typeof formatBalance>[0]) => {
   return formatNumber;
 };
 
-export const formatCurrency = (value: number, currency?: string) => {
-  return Intl.NumberFormat(undefined, {
+export const formatCurrency = (
+  value: number | bigint | string,
+  currency?: string
+) => {
+  return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currencyDisplay: 'narrowSymbol',
     currency: currency || 'usd',
-  }).format(value);
+  }).format(removeStringComma(String(value)) as never);
 };
-
-export const unitGAFI = (fee: string) => {
-  const shouldZeroFirst = fee.startsWith('0.');
-
-  return shouldZeroFirst
-    ? fee.replace('.', '') + '0'.repeat(14)
-    : fee.replace('.', '') + '0'.repeat(chainDecimal);
-};
-
-/**
- * @type (Parameters<typeof formatBalance>[0], number | string, boolean)
- * @param (get_balance = 2555000000000000000000, amount_multiply = 2, true)
- * @description
- * 1. get get_balance and convert to number (2,555 = 2555)
- * 2. sum by multiply with get_balance and amount_multiply (2555 * 2 = 5110)
- * 3. convert to unit GAFI (5110 = 5110000000000000000000)
- * 4. convert unit GAFI to format short (5,110)
- */
-export function sumGAFI(
-  get_balance: Parameters<typeof formatBalance>[0],
-  amount_multiply: number | string,
-  replace?: boolean
-): string | number {
-  const balance_to_number = formatGAFI(get_balance).replaceAll(',', ''); // 2,555 = 2555
-  const calculate_sum = Number(balance_to_number) * Number(amount_multiply);
-  const convert_to_unitGAFI = unitGAFI(String(calculate_sum));
-
-  if (replace) {
-    return formatGAFI(convert_to_unitGAFI).replaceAll(',', '');
-  }
-
-  return formatGAFI(convert_to_unitGAFI);
-}
 
 export const ColorOfRarity = (weight: number | string) => {
-  const easy = 100;
-  const medium = 35;
-  const hard = 10;
+  const level = {
+    none: 0,
+    hard: 10,
+    medium: 50,
+    easy: 100,
+  };
 
-  if (Number(weight) <= hard) return colors.second.purple;
-  if (Number(weight) <= medium) return colors.second.orange;
-  if (Number(weight) <= easy) return colors.primary.a[500];
+  // 'if' necessary sort orderby decremental
+  if (Number(weight) <= level.none) return '#ffffff';
+  if (Number(weight) <= level.hard) return colors.second.purple;
+  if (Number(weight) <= level.medium) return colors.second.orange;
+  if (Number(weight) <= level.easy) return colors.second.green;
 };
 
 export const CalculatorOfRarity = (weight: number, weights: number[]) => {
@@ -127,3 +102,9 @@ export const CalculatorOfRarity = (weight: number, weights: number[]) => {
 
   return suffixed ? Number(calculatorTotal).toFixed(1) : prefix;
 };
+
+export const removeStringComma = (string: string) =>
+  string.replaceAll(',', '').replaceAll('.', '');
+
+export const unitGAFI = (fee: string | number) =>
+  `${fee}${'0'.repeat(chainDecimal)}`; // -1 mean 1 + N-chainDecimal

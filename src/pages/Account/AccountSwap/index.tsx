@@ -28,7 +28,7 @@ export type AccountSwapFieldCommonProps = {
   collection_id: number;
   nft_id: number;
   image: string | null;
-  title: string | null;
+  name: string | null;
   amount: number;
 };
 

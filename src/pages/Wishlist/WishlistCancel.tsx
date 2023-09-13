@@ -19,7 +19,7 @@ export default ({ trade_id }: WishlistCancelProps) => {
   return (
     <Button
       variant="cancel"
-      padding={6}
+      px={6}
       borderRadius="3xl"
       isLoading={isLoading}
       onClick={() => {

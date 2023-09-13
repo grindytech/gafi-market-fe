@@ -29,7 +29,7 @@ export default function GameCreatorClaim() {
   const { account } = useAppSelector(state => state.injected.polkadot);
 
   const { mutation } = useSignAndSend({
-    key: ['123'],
+    key: ['GameCreatorClaim'],
     address: account?.address as string,
   });
 

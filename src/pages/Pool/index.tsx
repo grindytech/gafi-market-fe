@@ -1,25 +1,28 @@
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Center, CircularProgress, Flex, Stack } from '@chakra-ui/react';
 
 import CardBox from 'components/CardBox';
-import useLootTableOf, { lootTableOfProps } from 'hooks/useLootTableOf';
-import useMetaNFT from 'hooks/useMetaNFT';
-import usePoolOf, { poolOfProps } from 'hooks/usePoolOf';
-import BundleLayoutCardHeading from 'layouts/BundleLayout/BundleLayoutCardHeading';
-import BundleLayoutExpires from 'layouts/BundleLayout/BundleLayoutExpires';
-import BundleLayoutHeading from 'layouts/BundleLayout/BundleLayoutHeading';
-import BundleLayoutModelSwiper from 'layouts/BundleLayout/BundleLayoutModelSwiper';
-import BundleLayoutOwner from 'layouts/BundleLayout/BundleLayoutOwner';
-import BundleLayoutPrice from 'layouts/BundleLayout/BundleLayoutPrice';
-import BundleLayoutSocial from 'layouts/BundleLayout/BundleLayoutSocial';
+import { lootTableOfProps } from 'hooks/useLootTableOf';
+import { MetaNFTFieldProps } from 'hooks/useMetaNFT';
+import { poolOfProps } from 'hooks/usePoolOf';
+
 import DefaultDetail from 'layouts/DefaultLayout/DefaultDetail';
 import { useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { formatGAFI } from 'utils/utils';
 
 import { Swiper as SwiperType } from 'swiper/types';
-import BundleLayoutMenu from 'layouts/BundleLayout/BundleLayoutMenu';
+
 import PoolItems from './PoolItems';
 import PoolNow from './PoolNow';
+import SwiperLayoutThumb from 'layouts/SwiperLayout/SwiperLayoutThumb';
+import DetailSocial from 'layouts/Detail/DetailSocial';
+import DetailMenu from 'layouts/Detail/DetailMenu';
+import DetailCollectionName from 'layouts/Detail/DetailCollectionName';
+import DetailOwnerBy from 'layouts/Detail/DetailOwnerBy';
+import DetailExpires from 'layouts/Detail/DetailExpires';
+import DetailPrice from 'layouts/Detail/DetailPrice';
+import { useQuery } from '@tanstack/react-query';
+import axiosSwagger from 'axios/axios.swagger';
+import { TypeSwaggerNFTData } from 'types/swagger.type';
 
 export interface PoolServiceProps {
   poolOf: poolOfProps[];
@@ -35,47 +38,50 @@ export interface PoolServiceProps {
 
 export default () => {
   const { id } = useParams();
-
-  const { poolOf } = usePoolOf({
-    key: `pool_detail/${id}`,
-    filter: 'pool_id',
-    arg: [Number(id)],
-  });
-
-  const { lootTableOf } = useLootTableOf({
-    key: `pool_detail/${id}`,
-    filter: 'pool_id',
-    arg: [Number(id)],
-  });
-
-  const source = lootTableOf?.filter(
-    meta => !!meta.maybeNfT
-  ) as PoolServiceProps['source'];
-
-  return (
-    <>
-      {poolOf?.length && lootTableOf?.length ? (
-        <PoolServiceProps
-          poolOf={poolOf}
-          lootTableOf={lootTableOf}
-          source={source}
-        />
-      ) : null}
-    </>
-  );
-};
-
-function PoolServiceProps({ poolOf, lootTableOf, source }: PoolServiceProps) {
-  const { id } = useParams();
   const navigation = useNavigate();
 
-  const { metaNFT } = useMetaNFT({
-    key: `mint_detail/${id}`,
-    filter: 'collection_id',
-    arg: source.map(({ maybeNfT }) => ({
-      collection_id: maybeNfT.collection_id,
-      nft_id: maybeNfT.nft_id,
-    })),
+  const { data, isLoading, isError } = useQuery({
+    queryKey: [`pool_detail ne/${id}`],
+    queryFn: async () => {
+      return axiosSwagger.poolSearch({
+        body: {
+          query: {
+            pool_id: id as never,
+          },
+        },
+      });
+    },
+  });
+
+  const lootTable = data?.data.map(({ loot_table }) => loot_table).flat();
+
+  const { data: dataNFT } = useQuery({
+    queryKey: [`pool_detail_nft/${id}`],
+    queryFn: async () => {
+      if (lootTable?.length) {
+        return Promise.all(
+          lootTable.map(async meta => {
+            if (meta.nft) {
+              const service = await axiosSwagger.nftSearch({
+                body: {
+                  query: {
+                    collection_id: meta.nft?.collection as never,
+                    token_id: meta.nft?.item as never,
+                  },
+                },
+              });
+
+              return service.data;
+            }
+          })
+        ).then(data =>
+          data.flat().filter((meta): meta is NonNullable<typeof meta> => !!meta)
+        );
+      }
+
+      return [] as Partial<TypeSwaggerNFTData['data']>;
+    },
+    enabled: !!lootTable?.length,
   });
 
   const swiperRef = useRef<SwiperType>();
@@ -87,12 +93,12 @@ function PoolServiceProps({ poolOf, lootTableOf, source }: PoolServiceProps) {
       key: 0,
       heading: 'Detail',
       onClick: () => {
-        if (swiperRef.current && lootTableOf) {
-          const meta = lootTableOf[swiperRef.current.realIndex];
+        if (swiperRef.current && lootTable?.length) {
+          const meta = lootTable[swiperRef.current.realIndex];
 
-          if (meta?.maybeNfT) {
+          if (meta?.nft) {
             navigation({
-              pathname: `/nft/${meta.maybeNfT.nft_id}/${meta.maybeNfT.collection_id}`,
+              pathname: `/nft/${meta.nft.item}/${meta.nft.collection}`,
             });
           }
         }
@@ -100,66 +106,72 @@ function PoolServiceProps({ poolOf, lootTableOf, source }: PoolServiceProps) {
     },
   ];
 
+  if (isLoading)
+    return (
+      <Center height="100vh">
+        <CircularProgress isIndeterminate color="second.purple" />
+      </Center>
+    );
+
+  if (!data?.data.length || isError || !lootTable?.length) {
+    return <Center height="100vh">Not Found</Center>;
+  }
+
   return (
     <DefaultDetail>
-      <BundleLayoutModelSwiper
-        bundleOf={
-          lootTableOf.map(({ maybeNfT }) => ({
-            collection_id: maybeNfT?.collection_id,
-            nft_id: maybeNfT?.nft_id,
-          })) as never
+      <SwiperLayoutThumb
+        metaNFT={
+          dataNFT?.map(meta => ({
+            collection_id: meta?.collection_id,
+            nft_id: meta?.token_id,
+            image: meta?.image,
+          })) as MetaNFTFieldProps[]
         }
+        bundleOf={lootTable
+          .filter(meta => !!meta.nft)
+          .map(({ nft }) => ({
+            collection_id: nft.collection,
+            nft_id: nft.item,
+          }))}
         swiperRef={swiperRef}
         thumbs={thumbsSwiper}
-        metaNFT={metaNFT}
       >
-        <BundleLayoutSocial />
+        <DetailSocial />
 
-        <BundleLayoutMenu menu={ListMenu} />
-      </BundleLayoutModelSwiper>
+        <DetailMenu menu={ListMenu} />
+      </SwiperLayoutThumb>
 
       <Box>
         <CardBox variant="baseStyle">
-          <BundleLayoutCardHeading>
-            <BundleLayoutHeading heading="Mint detail" />
+          <Stack>
+            <DetailCollectionName name="Mint detail" />
 
-            <BundleLayoutOwner owner={String(poolOf[0].owner)} />
+            <DetailOwnerBy owner={data.data[0].owner} />
+          </Stack>
 
-            <BundleLayoutMenu menu={ListMenu} />
-          </BundleLayoutCardHeading>
-
-          <CardBox variant="baseStyle" padding={0}>
-            <BundleLayoutExpires
-              end={poolOf[0].endBlock.isEmpty ? 'Infinity' : 'Expired'}
+          <CardBox variant="baseStyle" padding={0} mt={6}>
+            <DetailExpires
+              end={data.data[0].end_at ? 'Expired' : 'Infinity'}
               heading="Pool"
-              endBlock={
-                poolOf[0].endBlock.isSome
-                  ? poolOf[0].endBlock.value.toNumber()
-                  : -1
-              }
+              endBlock={data.data[0].end_at || -1}
             />
 
-            <BundleLayoutPrice amount={formatGAFI(poolOf[0].price)} />
+            <DetailPrice amount={data.data[0].minting_fee} />
 
             <Flex gap={2} padding={6} pt={0}>
-              <PoolNow
-                pool_id={Number(id)}
-                price={poolOf[0].price}
-                metaNFT={metaNFT}
-              />
+              <PoolNow pool_id={Number(id)} />
             </Flex>
           </CardBox>
 
           <CardBox variant="baseStyle" mt={4}>
             <PoolItems
-              lootTableOf={lootTableOf}
-              source={source}
+              lootTable={lootTable}
+              data={dataNFT as TypeSwaggerNFTData['data']}
               setThumbsSwiper={setThumbsSwiper}
-              metaNFT={metaNFT}
             />
           </CardBox>
         </CardBox>
       </Box>
     </DefaultDetail>
   );
-}
+};

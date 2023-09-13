@@ -15,6 +15,7 @@ export const colors = {
     a: {
       100: '#D4EEFD',
       200: '#AADAFB',
+      400: '#5BA2E7',
       500: '#2A7AD7',
       600: '#1E5EB8',
       700: '#15469A',
@@ -38,6 +39,7 @@ export const colors = {
     red: '#EF4444',
     orange: '#FF7B00',
     purple: '#8338EC',
+    green: '#4ADE80',
   },
   ...backgrounds,
 };
@@ -47,6 +49,7 @@ export const styles = {
     body: {
       bg: 'shader.a.100',
       overflowX: 'hidden',
+      lineHeight: 'normal',
     },
     '*': {
       scrollBehavior: 'smooth',
@@ -71,7 +74,7 @@ export const fonts = {
   },
 };
 
-const CardBox: ComponentStyleConfig = {
+export const CardBox: ComponentStyleConfig = {
   variants: {
     createGames: {
       bg: 'white',
@@ -92,7 +95,7 @@ const CardBox: ComponentStyleConfig = {
   },
 };
 
-const Button: ComponentStyleConfig = {
+export const Button: ComponentStyleConfig = {
   variants: {
     unstyled: {
       minWidth: 'auto',
@@ -106,6 +109,10 @@ const Button: ComponentStyleConfig = {
       borderRadius: 'lg',
       _hover: {
         bg: 'primary.a.600',
+
+        ['&:disabled']: {
+          bg: 'primary.a.600',
+        },
       },
     },
     baseStyle: {
@@ -167,7 +174,7 @@ export const Table: ComponentStyleConfig = {
   },
 };
 
-const Heading: ComponentStyleConfig = {
+export const Heading: ComponentStyleConfig = {
   variants: {
     game: {
       fontSize: 'md',

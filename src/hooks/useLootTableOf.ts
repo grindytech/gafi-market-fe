@@ -1,12 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
 
-import { GafiSupportGameTypesLoot } from '@polkadot/types/lookup';
-import { Vec } from '@polkadot/types';
-
 export interface lootTableOfProps {
   weight: number;
   maybeNfT: { collection_id: number; nft_id: number } | null;
+  pool_id: number;
 }
 
 interface useLootTableOfProps {
@@ -30,8 +28,9 @@ export default function useLootTableOf({
           const service = await api.query.game.lootTableOf.entries();
 
           return service
-            .map(([, meta]) => {
+            .map(([key, meta]) => {
               return meta.map(option => ({
+                pool_id: key.args[0].toNumber(),
                 weight: option.weight.toNumber(),
                 maybeNfT: option.maybeNft.isSome
                   ? {
@@ -48,11 +47,10 @@ export default function useLootTableOf({
         if (filter === 'pool_id' && arg) {
           return Promise.all(
             arg.map(async pool_id => {
-              const service = (await api.query.game.lootTableOf(
-                pool_id
-              )) as Vec<GafiSupportGameTypesLoot>;
+              const service = await api.query.game.lootTableOf(pool_id);
 
               return service.map(meta => ({
+                pool_id,
                 weight: meta.weight.toNumber(),
                 maybeNfT: meta.maybeNft.isSome
                   ? {
@@ -68,7 +66,7 @@ export default function useLootTableOf({
         }
       }
 
-      // return []; // not found
+      return []; // not found
     },
     enabled: !!filter || !!arg,
   });

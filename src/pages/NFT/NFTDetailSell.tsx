@@ -15,7 +15,6 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import GafiAmount from 'components/GafiAmount';
 
 import { useAppSelector } from 'hooks/useRedux';
 import useSignAndSend from 'hooks/useSignAndSend';
@@ -26,7 +25,7 @@ import { formatCurrency } from 'utils/utils';
 
 import DurationBlock, { ListDurationProps } from 'components/DurationBlock';
 import useBlockTime from 'hooks/useBlockTime';
-import { BLOCK_TIME } from 'utils/constants';
+import { BLOCK_TIME, unitGAFI } from 'utils/contants.utils';
 
 interface NFTDetailSellProps {
   refetch: () => void;
@@ -46,7 +45,9 @@ export default function NFTDetailSell({ refetch }: NFTDetailSellProps) {
     watch,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm<{ price: string; amount: number }>();
+
+  const { amount, price } = watch();
 
   const ListDuration: ListDurationProps[] = [
     {
@@ -99,7 +100,6 @@ export default function NFTDetailSell({ refetch }: NFTDetailSellProps) {
       borderRadius="3xl"
       isLoading={isLoading}
       onClick={onOpen}
-      _hover={{}}
     >
       Sell Now
       <Modal
@@ -128,18 +128,17 @@ export default function NFTDetailSell({ refetch }: NFTDetailSellProps) {
               fontWeight: 'normal',
               fontSize: 'sm',
             },
-            '.amount-gafi': {
-              color: 'shader.a.900',
-              fontSize: 'sm',
-              fontWeight: 'medium',
-            },
           }}
           onSubmit={handleSubmit(({ price, amount }) => {
             if (api) {
               mutation(
                 api.tx.game.setPrice(
-                  { collection: collection_id, item: nft_id, amount },
-                  price,
+                  {
+                    collection: Number(collection_id),
+                    item: Number(nft_id),
+                    amount,
+                  },
+                  BigInt(unitGAFI(price)),
                   blockNumber, // start_block
                   blockNumber + duration.time // end_block
                 )
@@ -166,7 +165,10 @@ export default function NFTDetailSell({ refetch }: NFTDetailSellProps) {
               <Input
                 placeholder="Enter Amount"
                 isRequired={false}
-                {...register('amount', { required: true })}
+                {...register('amount', {
+                  required: true,
+                  valueAsNumber: true,
+                })}
               />
             </FormControl>
 
@@ -193,37 +195,26 @@ export default function NFTDetailSell({ refetch }: NFTDetailSellProps) {
             justifyContent="space-between"
             display="block"
           >
-            <Flex justifyContent="space-between">
-              <Text as="span">Total value</Text>
+            {price && amount ? (
+              <Flex justifyContent="space-between" mb={4}>
+                <Text as="span">Total value</Text>
 
-              <Box textAlign="right">
-                <GafiAmount
-                  amount={watch().price || 0}
-                  sx={{
-                    className: 'amount-gafi',
-                    sx: {
-                      span: {
-                        color: 'inherit!',
-                        fontSize: 'inherit',
-                        fontWeight: 'inherit',
-                      },
-                    },
-                  }}
-                />
+                <Box textAlign="right">
+                  <Text fontWeight="medium" fontSize="sm">
+                    {price}&nbsp;
+                    <Text as="span">GAFI</Text>
+                  </Text>
 
-                <Text as="span">
-                  {formatCurrency(Number(watch().price || 0), 'usd')}
-                </Text>
-              </Box>
-            </Flex>
+                  <Text as="span">{formatCurrency(price)}</Text>
+                </Box>
+              </Flex>
+            ) : null}
 
             <Button
               isLoading={isLoading}
               variant="primary"
               width="full"
               type="submit"
-              mt={4}
-              _hover={{}}
             >
               Sell
             </Button>

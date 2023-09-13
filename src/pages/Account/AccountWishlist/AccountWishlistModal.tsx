@@ -15,7 +15,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import RatioPicture from 'components/RatioPicture';
-import { cloundinary_link } from 'axios/cloudinary_axios';
+
 import AccountOwnerIncrement from '../AccountOwner/AccountOwnerIncrement';
 import { useEffect } from 'react';
 import useMetaNFT from 'hooks/useMetaNFT';
@@ -130,11 +130,7 @@ export default ({
                   gap={4}
                 >
                   <RatioPicture
-                    src={
-                      currentMetaNFT?.image
-                        ? cloundinary_link(currentMetaNFT.image)
-                        : null
-                    }
+                    src={currentMetaNFT?.image || null}
                     sx={{ width: 20, height: 20 }}
                   />
 
@@ -146,11 +142,11 @@ export default ({
                     wordBreak="break-word"
                   >
                     <Text fontSize="sm" color="shader.a.500">
-                      {currentMetaCollection?.title || '-'}
+                      {currentMetaCollection?.name}
                     </Text>
 
                     <Text as="strong">
-                      {currentMetaNFT?.title || '-'}&nbsp;
+                      {currentMetaNFT?.name}&nbsp;
                       <Text as="span" fontWeight="normal" color="shader.a.700">
                         ID: {nft_id}
                       </Text>

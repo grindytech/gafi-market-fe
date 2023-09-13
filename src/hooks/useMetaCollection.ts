@@ -1,25 +1,30 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAppSelector } from './useRedux';
-import { TypeMetadataOfCollection } from 'types';
+
 import useSubscribeSystem from './useSubscribeSystem';
 import { useEffect } from 'react';
-import { Option, StorageKey, u32 } from '@polkadot/types';
-import { PalletNftsCollectionMetadata } from '@polkadot/types/lookup';
+
+import { TypeMetaCollection } from 'types/meta.type.ts';
+import { useAppSelector } from './useRedux';
 
 export interface useMetaCollectionProps {
   filter: 'entries' | 'collection_id';
   arg?: number[];
   key: string | string[] | number | number[];
+  async?: boolean;
+}
+
+export interface MetaCollectionFieldProps extends TypeMetaCollection {
+  collection_id: number;
 }
 
 export default function useMetaCollection({
   filter,
   arg,
   key,
+  async,
 }: useMetaCollectionProps) {
-  const { event, setEvent } = useSubscribeSystem('nfts::CollectionMetadataSet');
-
   const { api } = useAppSelector(state => state.substrate);
+  const { event, setEvent } = useSubscribeSystem('nfts::CollectionMetadataSet');
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [`collectionMetadataOf`, key],
@@ -28,23 +33,16 @@ export default function useMetaCollection({
         if (filter === 'entries') {
           const service = await api.query.nfts.collectionMetadataOf.entries();
 
-          return service.map(
-            ([collection_id, meta]: [
-              StorageKey<[u32]>,
-              Option<PalletNftsCollectionMetadata>
-            ]) => {
-              const { external_url, image, title } = JSON.parse(
-                meta.value.data.toHuman() as string
-              );
+          return service.map(([collection_id, meta]) => {
+            const metadata = JSON.parse(
+              String(meta.value.data.toHuman())
+            ) as TypeMetaCollection;
 
-              return {
-                collection_id: collection_id.args[0].toNumber(),
-                external_url,
-                image,
-                title,
-              } as TypeMetadataOfCollection;
-            }
-          );
+            return {
+              ...metadata,
+              collection_id: collection_id.args[0].toNumber(),
+            } as MetaCollectionFieldProps;
+          });
         }
 
         if (filter === 'collection_id' && arg) {
@@ -56,19 +54,17 @@ export default function useMetaCollection({
 
               if (service.isEmpty) return;
 
-              const { external_url, image, title } = JSON.parse(
-                service.value.data.toHuman() as string
-              );
+              const metadata = JSON.parse(
+                String(service.value.data.toHuman())
+              ) as TypeMetaCollection;
 
               return {
-                collection_id: collection_id,
-                external_url,
-                image,
-                title,
-              } as TypeMetadataOfCollection;
+                ...metadata,
+                collection_id,
+              } as MetaCollectionFieldProps;
             })
           ).then(data =>
-            data.filter((meta): meta is TypeMetadataOfCollection => !!meta)
+            data.filter((meta): meta is MetaCollectionFieldProps => !!meta)
           );
         }
       }
@@ -78,6 +74,12 @@ export default function useMetaCollection({
     },
     enabled: !!filter,
   });
+
+  useEffect(() => {
+    if (!async && !isLoading) {
+      refetch();
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (event) {

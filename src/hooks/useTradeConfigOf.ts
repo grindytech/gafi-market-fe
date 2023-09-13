@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
-import { Option, StorageKey, Vec, u128, u32 } from '@polkadot/types';
-import {
-  GafiSupportGameTypesTradeType,
-  PalletGameTradeConfig,
-} from '@polkadot/types/lookup';
+import { Option, Vec, u128, u32 } from '@polkadot/types';
+import { GafiSupportGameTypesTradeType } from '@polkadot/types/lookup';
 import { GafiSupportGameTypesPackage } from '@polkadot/types/lookup';
 
 export interface tradeConfigProps {
@@ -36,21 +33,16 @@ export default function useTradeConfigOf({
         if (filter === 'entries') {
           const service = await api.query.game.tradeConfigOf.entries();
 
-          return service.map(
-            ([trade_id, meta]: [
-              StorageKey<[u32]>,
-              Option<PalletGameTradeConfig>
-            ]) => {
-              return {
-                trade_id: trade_id.args[0].toNumber(),
-                trade: meta.value.trade,
-                owner: meta.value.owner.toString(),
-                maybePrice: meta.value.maybePrice,
-                maybeRequired: meta.value.maybeRequired,
-                endBlock: meta.value.endBlock,
-              } as tradeConfigProps;
-            }
-          );
+          return service.map(([trade_id, meta]) => {
+            return {
+              trade_id: trade_id.args[0].toNumber(),
+              trade: meta.value.trade,
+              owner: meta.value.owner.toString(),
+              maybePrice: meta.value.maybePrice,
+              maybeRequired: meta.value.maybeRequired,
+              endBlock: meta.value.endBlock,
+            } as tradeConfigProps;
+          });
         }
 
         if (filter === 'trade_id' && arg) {

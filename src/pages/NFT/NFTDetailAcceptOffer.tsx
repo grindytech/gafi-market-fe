@@ -1,12 +1,13 @@
 import { Button, ButtonProps } from '@chakra-ui/react';
-import useSetBuyClamied from 'hooks/useSetBuyClaimed';
+import { useAppSelector } from 'hooks/useRedux';
+import useSignAndSend from 'hooks/useSignAndSend';
 
 interface NFTDetailAcceptOfferProps {
   trade_id: number;
   amount: number;
   price: number;
   sx?: ButtonProps;
-  refetch?: () => void;
+  refetch: () => void;
 }
 
 export default function NFTDetailAcceptOffer({
@@ -16,23 +17,26 @@ export default function NFTDetailAcceptOffer({
   sx,
   refetch,
 }: NFTDetailAcceptOfferProps) {
-  const { isLoading, mutation } = useSetBuyClamied({
-    trade_id,
-    amount,
-    price,
-    refetch() {
-      if (refetch) {
-        refetch();
-      }
+  const { account } = useAppSelector(state => state.injected.polkadot);
+  const { api } = useAppSelector(state => state.substrate);
+
+  const { mutation, isLoading } = useSignAndSend({
+    key: [`nft_detail_accept_offer`, account?.address as string],
+    address: account?.address as string,
+    onSuccess() {
+      refetch();
     },
   });
 
   return (
     <Button
       variant="primary"
-      _hover={{}}
       isLoading={isLoading}
-      onClick={mutation}
+      onClick={() => {
+        if (api) {
+          mutation(api.tx.game.sellItem(trade_id, amount, price));
+        }
+      }}
       {...sx}
     >
       Accept

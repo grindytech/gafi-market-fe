@@ -25,11 +25,10 @@ export default ({ maybePrice }: SwapAcceptProps) => {
         fontSize="sm"
         px={12}
         borderRadius="3xl"
-        _hover={{}}
         isLoading={isLoading}
         onClick={() => {
           if (api) {
-            mutation(api.tx.game.claimSwap(Number(id), maybePrice));
+            mutation(api.tx.game.makeSwap(Number(id), maybePrice));
           }
         }}
       >

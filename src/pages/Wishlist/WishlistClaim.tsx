@@ -20,12 +20,12 @@ export default ({ trade_id, maybePrice }: WishlistClaimProps) => {
   return (
     <Button
       variant="primary"
-      padding={6}
+      px={6}
       borderRadius="3xl"
       isLoading={isLoading}
       onClick={() => {
         if (api) {
-          mutation(api.tx.game.claimWishlist(trade_id, maybePrice));
+          mutation(api.tx.game.sellBundle(trade_id, maybePrice));
         }
       }}
     >

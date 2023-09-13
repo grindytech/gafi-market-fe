@@ -22,15 +22,15 @@ import {
   FIREFOX_ADDON_URL,
   GAFI_WALLET_ACCOUNT_KEY,
   GAFI_WALLET_STORAGE_KEY,
-} from 'utils/constants';
+} from 'utils/contants.utils';
 
 import PolkadotIcon from 'public/assets/wallet/polkadot-js.svg';
 import SubWalletIcon from 'public/assets/wallet/subwallet.svg';
 import CloverWallet from 'public/assets/wallet/clover.svg';
 
-import { loadAccounts } from './ConnectSubstrateUtils';
 import { injectedAccount } from 'redux/injected';
 import { getInjectedWeb3 } from 'utils/utils';
+import { loadAccounts } from 'utils/substrate.utils';
 
 export default function ConnectSubstrate() {
   const extensionName = localStorage.getItem(GAFI_WALLET_STORAGE_KEY);
@@ -115,22 +115,21 @@ export default function ConnectSubstrate() {
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
 
-          <ModalContent p={4}>
-            <ModalHeader>Connect Wallet</ModalHeader>
+          <ModalContent padding={6} width="fit-content">
+            <ModalHeader padding={0} mb={5}>
+              Connect Wallet
+            </ModalHeader>
 
-            <ModalBody alignSelf="center">
-              <ButtonGroup
-                flexDirection="column"
-                spacing={0}
-                gap={4}
-                variant="ghost"
-                size="md"
-              >
+            <ModalBody padding={0}>
+              <ButtonGroup flexDirection="column" spacing={0} gap={2.5}>
                 {React.Children.toArray(
                   wallets.map(button => (
                     <Button
+                      variant="unstyled"
                       justifyContent="start"
                       width="full"
+                      px={4}
+                      py={1.5}
                       iconSpacing={4}
                       onClick={button.onClick}
                       leftIcon={<Icon as={button.icon} width={8} height={8} />}
@@ -139,6 +138,7 @@ export default function ConnectSubstrate() {
                     </Button>
                   ))
                 )}
+
                 <FormControl
                   isInvalid={
                     keyringState === 'ERROR' || keyringState === 'INSTALL'
@@ -153,8 +153,8 @@ export default function ConnectSubstrate() {
               </ButtonGroup>
             </ModalBody>
 
-            <ModalFooter justifyContent="center" letterSpacing={1}>
-              {!window.injectedWeb3 && (
+            {!window.injectedWeb3 && (
+              <ModalFooter justifyContent="center" letterSpacing={1}>
                 <Text textAlign="center">
                   Create an account with Polkadot-JS Extension (
                   <Link
@@ -176,8 +176,8 @@ export default function ConnectSubstrate() {
                   </Link>
                   )&nbsp;
                 </Text>
-              )}
-            </ModalFooter>
+              </ModalFooter>
+            )}
           </ModalContent>
         </Modal>
       )}

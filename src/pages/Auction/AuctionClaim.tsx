@@ -24,7 +24,7 @@ export default function AuctionClaim() {
       isLoading={isLoading}
       onClick={() => {
         if (api) {
-          mutation(api.tx.game.claimAuction(Number(id)));
+          mutation(api.tx.game.closeAuction(Number(id)));
         }
       }}
     >

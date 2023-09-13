@@ -11,30 +11,43 @@ import {
 import { useAppSelector } from 'hooks/useRedux';
 import { useParams } from 'react-router-dom';
 import { shorten } from 'utils/utils';
-import { cloundinary_link } from 'axios/cloudinary_axios';
-
-import useMetaCollection from 'hooks/useMetaCollection';
 
 import RatioPicture from 'components/RatioPicture';
-import CollectionNFTOf from './CollectionNFTOf';
-import useNFTsCollection from 'hooks/useNFTsCollection';
+
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import axiosSwagger from 'axios/axios.swagger';
+import CollectionNFT from './CollectionNFT';
 
 export default function Collection() {
   const { collection_id } = useParams();
 
   const { account } = useAppSelector(state => state.injected.polkadot);
 
-  const { NFTsCollection, isLoading, isError } = useNFTsCollection({
-    key: `collection_detail/${collection_id}`,
-    filter: 'collection_id',
-    arg: [Number(collection_id)],
+  const { data, isLoading, isError } = useQuery({
+    queryKey: [`collection_detail/${collection_id}`],
+    queryFn: async () => {
+      return axiosSwagger.collectionSearch({
+        body: {
+          query: {
+            collection_id: collection_id,
+          },
+        },
+      });
+    },
   });
 
-  const { MetaCollection } = useMetaCollection({
-    key: `collection_detail/${collection_id}`,
-    filter: 'collection_id',
-    arg: [Number(collection_id)],
+  const { data: DataNFT, isLoading: isLoadingNFT } = useQuery({
+    queryKey: [`nft_collection_detail/${collection_id}`],
+    queryFn: async () => {
+      return axiosSwagger.nftSearch({
+        body: {
+          query: {
+            collection_id: collection_id,
+          },
+        },
+      });
+    },
   });
 
   if (isLoading) {
@@ -49,7 +62,7 @@ export default function Collection() {
 
   return (
     <>
-      {NFTsCollection?.length ? (
+      {data?.data.length ? (
         <Box
           borderRadius="xl"
           boxShadow="0px 0.1875rem 0.875rem 0px rgba(0, 0, 0, 0.05)"
@@ -57,11 +70,7 @@ export default function Collection() {
         >
           <Center height={80} position="relative">
             <RatioPicture
-              src={
-                MetaCollection?.[0]?.image
-                  ? cloundinary_link(MetaCollection[0].image)
-                  : null
-              }
+              src={data.data[0].logo || null}
               sx={{ height: 'full', width: 'full', pointerEvents: 'none' }}
             />
 
@@ -73,11 +82,7 @@ export default function Collection() {
             />
 
             <RatioPicture
-              src={
-                MetaCollection?.[0]?.image
-                  ? cloundinary_link(MetaCollection[0].image)
-                  : null
-              }
+              src={data.data[0].logo || null}
               sx={{
                 height: 32,
                 width: 32,
@@ -91,20 +96,20 @@ export default function Collection() {
 
           <Center pt={20} pb={6} flexDirection="column" textAlign="center">
             <Heading fontSize="2xl" color="shader.a.900">
-              {MetaCollection?.[0]?.title || '-'}
+              {data.data[0].name}
             </Heading>
 
             <Text
               as={Link}
-              to={`/account/${NFTsCollection[0].owner}`}
+              to={`/account/${data.data[0].owner}`}
               fontWeight="normal"
               color="shader.a.500"
             >
               Owner by&nbsp;
               <Text as="span" color="primary.a.500" fontWeight="medium">
-                {NFTsCollection[0].owner === account?.address
+                {data.data[0].owner === account?.address
                   ? 'You'
-                  : shorten(NFTsCollection[0].owner)}
+                  : shorten(data.data[0].owner)}
               </Text>
             </Text>
 
@@ -125,12 +130,12 @@ export default function Collection() {
               <ListItem>
                 <Text>Items</Text>
 
-                <Text as="span">{NFTsCollection[0].items}</Text>
+                <Text as="span">{DataNFT?.data.length || 0}</Text>
               </ListItem>
             </List>
           </Center>
 
-          <CollectionNFTOf />
+          <CollectionNFT data={DataNFT} isLoading={isLoadingNFT} />
         </Box>
       ) : null}
     </>

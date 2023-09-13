@@ -4,7 +4,7 @@ import { DefinitionRpcExt } from '@polkadot/types/types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import config from 'config';
 import polkadotJsonrpc from '@polkadot/types/interfaces/jsonrpc';
-import { chainDecimal } from 'utils/constants';
+import { chainDecimal } from 'utils/contants.utils';
 
 interface PayloadProps {
   apiState?: reduxSubstrateProps['apiState'];

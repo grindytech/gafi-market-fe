@@ -22,18 +22,19 @@ import { useParams } from 'react-router-dom';
 
 import { useForm } from 'react-hook-form';
 
-import { cloundinary_link } from 'axios/cloudinary_axios';
-import GafiAmount from 'components/GafiAmount';
-import { formatCurrency } from 'utils/utils';
+import { formatCurrency, formatGAFI } from 'utils/utils';
 
 import useMetaCollection from 'hooks/useMetaCollection';
 import useMetaNFT from 'hooks/useMetaNFT';
 import useItemBought from 'hooks/useItemBought';
 import RatioPicture from 'components/RatioPicture';
 
+import { BigNumber } from 'bignumber.js';
+import { unitGAFI } from 'utils/contants.utils';
+
 interface NFTDetailBuyProps {
   trade_id: number;
-  fee: number;
+  fee: string;
   amount: number;
   sx?: ButtonProps;
   refetch: () => void;
@@ -55,7 +56,11 @@ export default function NFTDetailBuy({
     watch,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm<{
+    supply: number;
+  }>();
+
+  const { supply } = watch();
 
   const { metaNFT } = useMetaNFT({
     key: `nft_detail/${nft_id}/${collection_id}`,
@@ -69,17 +74,13 @@ export default function NFTDetailBuy({
     arg: [Number(collection_id)],
   });
 
-  const { isLoading, mutation } = useItemBought({
+  const { isLoading, mutation, api } = useItemBought({
     trade_id,
-    amount: watch().amount,
-    bidPrice: amount * fee,
     refetch() {
       refetch();
       onClose();
     },
   });
-
-  const { amount: supply } = watch();
 
   return (
     <Button
@@ -89,7 +90,6 @@ export default function NFTDetailBuy({
       fontWeight="medium"
       isLoading={isLoading}
       onClick={onOpen}
-      _hover={{}}
       {...sx}
     >
       Buy now
@@ -120,13 +120,18 @@ export default function NFTDetailBuy({
                 fontWeight: 'normal',
                 fontSize: 'sm',
               },
-              '.amount-gafi': {
-                color: 'shader.a.900',
-                fontSize: 'sm',
-                fontWeight: 'medium',
-              },
             }}
-            onSubmit={handleSubmit(mutation)}
+            onSubmit={handleSubmit(() => {
+              mutation(
+                api?.tx.game.buyItem(
+                  trade_id,
+                  amount,
+                  BigInt(
+                    unitGAFI(BigNumber(fee).multipliedBy(supply).toFixed())
+                  )
+                )
+              );
+            })}
           >
             <ModalHeader
               display="flex"
@@ -152,17 +157,13 @@ export default function NFTDetailBuy({
                 <Flex gap={4}>
                   <RatioPicture
                     alt={nft_id}
-                    src={
-                      metaNFT?.[0]?.image
-                        ? cloundinary_link(metaNFT?.[0]?.image)
-                        : null
-                    }
+                    src={metaNFT?.[0].image || null}
                     sx={{ width: 32 }}
                   />
 
                   <Box>
                     <Text color="primary.a.500" fontWeight="medium">
-                      {MetaCollection?.[0]?.title || '-'}
+                      {MetaCollection?.[0]?.name}
                     </Text>
 
                     <Text
@@ -171,7 +172,7 @@ export default function NFTDetailBuy({
                       fontWeight="semibold"
                       fontSize="xl"
                     >
-                      {metaNFT?.[0]?.title || '-'}
+                      {metaNFT?.[0]?.name}
                       <Text
                         as="strong"
                         fontWeight="medium"
@@ -196,29 +197,23 @@ export default function NFTDetailBuy({
                 <Text as="span">Current price</Text>
 
                 <Box textAlign="right">
-                  <GafiAmount
-                    amount={fee}
-                    sx={{
-                      className: 'amount-gafi',
-                      sx: {
-                        span: {
-                          color: 'inherit!',
-                          fontSize: 'inherit',
-                          fontWeight: 'inherit',
-                        },
-                      },
-                    }}
-                  />
+                  <Text fontWeight="medium" fontSize="sm">
+                    {formatGAFI(fee)}&nbsp;
+                    <Text as="span">GAFI</Text>
+                  </Text>
 
-                  <Text as="span">{formatCurrency(fee, 'usd')}</Text>
+                  <Text as="span">{formatCurrency(formatGAFI(fee))}</Text>
                 </Box>
               </Flex>
 
-              <FormControl isRequired={true} isInvalid={!!errors.amount}>
+              <FormControl isRequired={true} isInvalid={!!errors.supply}>
                 <Input
                   placeholder="Enter supply"
                   isRequired={false}
-                  {...register('amount', { required: true })}
+                  {...register('supply', {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
                 />
               </FormControl>
             </ModalBody>
@@ -230,38 +225,32 @@ export default function NFTDetailBuy({
               padding={4}
               justifyContent="space-between"
               display="block"
+              opacity={supply ? undefined : 0.4}
+              pointerEvents={supply ? undefined : 'none'}
             >
-              <Flex justifyContent="space-between">
-                <Text as="span">Total value</Text>
+              {supply ? (
+                <Flex justifyContent="space-between" mb={4}>
+                  <Text as="span">Total value</Text>
 
-                <Box textAlign="right">
-                  <GafiAmount
-                    amount={supply * fee || 0}
-                    sx={{
-                      className: 'amount-gafi',
-                      sx: {
-                        span: {
-                          color: 'inherit!',
-                          fontSize: 'inherit',
-                          fontWeight: 'inherit',
-                        },
-                      },
-                    }}
-                  />
+                  <Box textAlign="right">
+                    <Text fontWeight="medium" fontSize="sm">
+                      {Number(formatGAFI(fee)) * supply}
+                      &nbsp;
+                      <Text as="span">GAFI</Text>
+                    </Text>
 
-                  <Text as="span">
-                    {formatCurrency(supply * fee || 0, 'usd')}
-                  </Text>
-                </Box>
-              </Flex>
+                    <Text as="span">
+                      {formatCurrency(Number(formatGAFI(fee)) * supply)}
+                    </Text>
+                  </Box>
+                </Flex>
+              ) : null}
 
               <Button
                 isLoading={isLoading}
                 variant="primary"
                 width="full"
                 type="submit"
-                mt={4}
-                _hover={{}}
               >
                 Purchase
               </Button>

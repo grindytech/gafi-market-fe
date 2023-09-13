@@ -1,15 +1,27 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
-import { StorageKey, Vec, u32 } from '@polkadot/types';
-import { GafiSupportGameTypesPackage } from '@polkadot/types/lookup';
+import { useEffect } from 'react';
 
 export interface useBundleOfProps {
   filter: 'entries' | 'trade_id';
   arg?: number[];
   key: string | string[] | number | number[];
+  async?: boolean;
 }
 
-export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
+export interface BundleOfFieldProps {
+  trade_id: number;
+  collection_id: number;
+  nft_id: number;
+  amount: number;
+}
+
+export default function useBundleOf({
+  filter,
+  arg,
+  key,
+  async,
+}: useBundleOfProps) {
   const { api } = useAppSelector(state => state.substrate);
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -19,24 +31,18 @@ export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
         if (filter === 'entries') {
           const service = await api.query.game.bundleOf.entries();
 
-          return service.map(
-            ([trade_id, meta]: [
-              StorageKey<[u32]>,
-              Vec<GafiSupportGameTypesPackage>
-            ]) => ({
-              trade_id: trade_id.args[0].toNumber(),
-              collection_id: meta[0].collection.toNumber(),
-              nft_id: meta[0].item.toNumber(),
-              amount: meta[0].amount.toNumber(),
-            })
-          );
+          return service.map(([trade_id, meta]) => ({
+            trade_id: trade_id.args[0].toNumber(),
+            collection_id: meta[0].collection.toNumber(),
+            nft_id: meta[0].item.toNumber(),
+            amount: meta[0].amount.toNumber(),
+          })) as BundleOfFieldProps[];
         }
 
         if (filter === 'trade_id' && arg) {
           return Promise.all(
             arg.map(async trade_id => {
-              const service: Vec<GafiSupportGameTypesPackage> =
-                await api.query.game.bundleOf(trade_id);
+              const service = await api.query.game.bundleOf(trade_id);
 
               if (service.isEmpty) return;
 
@@ -48,11 +54,8 @@ export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
               }));
             })
           ).then(data =>
-            data
-              .filter((meta): meta is NonNullable<typeof meta> => !!meta)
-              .flat()
+            data.filter((meta): meta is BundleOfFieldProps[] => !!meta).flat()
           );
-          // not found and fill all array [Array(3)] = [1, 2, X]
         }
       }
 
@@ -61,6 +64,12 @@ export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
     },
     enabled: !!filter || !!arg,
   });
+
+  useEffect(() => {
+    if (!async) {
+      refetch();
+    }
+  }, [async]);
 
   return {
     bundleOf: data,

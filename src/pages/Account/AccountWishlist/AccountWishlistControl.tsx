@@ -1,7 +1,7 @@
 import DurationBlock, { ListDurationProps } from 'components/DurationBlock';
 import { useEffect, useState } from 'react';
 import { Control, UseFormSetValue, UseFormWatch } from 'react-hook-form';
-import { BLOCK_TIME } from 'utils/constants';
+import { BLOCK_TIME, unitGAFI } from 'utils/contants.utils';
 import { AccountWishlistFieldProps } from '.';
 import { Button, Stack } from '@chakra-ui/react';
 import NumberInput from 'components/NumberInput';
@@ -9,8 +9,9 @@ import { isNull } from '@polkadot/util';
 import { useAppSelector } from 'hooks/useRedux';
 import useSignAndSend from 'hooks/useSignAndSend';
 import { useNavigate } from 'react-router-dom';
-import useBlockTime from 'hooks/useBlockTime';
+// import useBlockTime from 'hooks/useBlockTime';
 import useSubscribeSystem from 'hooks/useSubscribeSystem';
+import useBlockTime from 'hooks/useBlockTime';
 
 interface AccountWishlistControlProps {
   onSuccess: () => void;
@@ -22,7 +23,7 @@ interface AccountWishlistControlProps {
 }
 
 export default ({ onSuccess, formState }: AccountWishlistControlProps) => {
-  const { product: productForm, price, selected } = formState.watch();
+  const { price, selected, product: productForm } = formState.watch();
 
   const product = Object.values(productForm || []).filter(meta => !!meta);
 
@@ -69,7 +70,7 @@ export default ({ onSuccess, formState }: AccountWishlistControlProps) => {
 
   const { event, setEvent } = useSubscribeSystem('game::WishlistSet');
 
-  const { mutation, isLoading } = useSignAndSend({
+  const { isLoading, mutation } = useSignAndSend({
     key: [`setWishlist/${account?.address}`],
     address: account?.address as string,
     onSuccess,
@@ -88,6 +89,8 @@ export default ({ onSuccess, formState }: AccountWishlistControlProps) => {
       });
     }
   }, [event]);
+
+  console.log({ product, selected });
 
   return (
     <Stack spacing={4} px={6} py={4}>
@@ -125,13 +128,13 @@ export default ({ onSuccess, formState }: AccountWishlistControlProps) => {
 
           if (api && price && selected) {
             mutation(
-              api.tx.game.setWishlist(
+              api.tx.game.orderBundle(
                 product.map(({ collection_id, nft_id }, index) => ({
                   collection: collection_id,
                   item: nft_id,
                   amount: selected[index],
                 })),
-                price,
+                BigInt(unitGAFI(price)),
                 blockNumber,
                 blockNumber + duration.time
               )

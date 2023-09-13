@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { InjectedAccount } from 'types/polkadot.type';
 
 interface PayloadProps {
   keyringState?: reduxInjectedProps['keyringState'];
