@@ -81,46 +81,17 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxMintItem: u32 & AugmentedConst<ApiType>;
       /**
-       * Maximum number of minting requests per block.
-       **/
-      maxMintRequest: u32 & AugmentedConst<ApiType>;
-      /**
-       * The basic amount of funds that must be reserved for a minting pool.
+       * The basic amount of funds that must be reserved for a mining pool.
        **/
       miningPoolDeposit: u128 & AugmentedConst<ApiType>;
       /**
-       * Number of blocks of cooldown required to process minting requests.
+       * The Game's pallet id
        **/
-      mintInterval: u32 & AugmentedConst<ApiType>;
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
       /**
        * The basic amount of funds that must be reserved for any upgrade.
        **/
       upgradeDeposit: u128 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
-    gameRandomness: {
-      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
-      /**
-       * Number of attempts to re-randomize in order to reduce modulus bias.
-       **/
-      randomAttemps: u32 & AugmentedConst<ApiType>;
-      /**
-       * Number of blocks of cooldown after unsigned transaction is included.
-       * 
-       * This ensures that we only accept unsigned transactions once, every `UnsignedInterval`
-       * blocks.
-       **/
-      unsignedInterval: u32 & AugmentedConst<ApiType>;
-      /**
-       * A configuration for base priority of unsigned transactions.
-       * 
-       * This is exposed so that it can be tuned for particular runtime, when
-       * multiple pallets send unsigned transactions.
-       **/
-      unsignedPriority: u64 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

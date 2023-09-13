@@ -11,7 +11,7 @@
       "*": ["src/*"],
       "public/*": ["public/*"],
       // this is the package name we use (in the interface imports, --package for generators)
-      "gafi-dashboard/*": ["./*"],
+      "gafi-dashboard/*": ["src/*"],
       // here we replace the @polkadot/api augmentation with our own, generated from chain
       "@polkadot/api/augment": ["interfaces/augment-api.ts"],
       // replace the augmented types with our own, as generated from definitions

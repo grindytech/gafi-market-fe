@@ -15,6 +15,7 @@ export const colors = {
     a: {
       100: '#D4EEFD',
       200: '#AADAFB',
+      400: '#5BA2E7',
       500: '#2A7AD7',
       600: '#1E5EB8',
       700: '#15469A',
@@ -38,6 +39,7 @@ export const colors = {
     red: '#EF4444',
     orange: '#FF7B00',
     purple: '#8338EC',
+    green: '#4ADE80',
   },
   ...backgrounds,
 };

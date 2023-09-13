@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite --host",
     "lint": "eslint src --ext .ts,.tsx",
+    "lint2": "tsc --noEmit --pretty",
     "build": "vite build",
     "preview": "vite preview --host",
     "typegen": "yarn get:testnet:metadata && yarn generate:defs && yarn generate:meta",
@@ -33,7 +34,6 @@
     "@polkadot/extension-dapp": "^0.46.2",
     "@polkadot/keyring": "^12.1.2",
     "@polkadot/networks": "^12.1.2",
-    "@polkadot/typegen": "^10.6.1",
     "@polkadot/types": "^10.6.1",
     "@polkadot/ui-keyring": "^3.3.1",
     "@polkadot/ui-settings": "^3.3.1",
@@ -68,6 +68,7 @@
     "web3": "^4.0.1"
   },
   "devDependencies": {
+    "@polkadot/typegen": "^10.6.1",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.2.6",
     "@types/react": "^18.2.11",

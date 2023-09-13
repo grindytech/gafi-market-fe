@@ -152,17 +152,15 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * Weight: `O(1)`
        **/
-      addSetPrice: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, supply: GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, GafiSupportGameTypesPackage]>;
+      addRetailSupply: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, supply: GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, GafiSupportGameTypesPackage]>;
       /**
+       * Add supplies for the item.
        * 
-       * Origin must be signed and have permission. Item's supply must not be infinite.
+       * The origin must be Signed and the sender should be the Admin of `collection`.
        * 
-       * # Parameters
-       * 
-       * - `origin`: Signed origin of the transaction.
-       * - `collection`: Identifier of the collection.
-       * - `item`: Identifier of the item.
-       * - `amount`: Amount to add to balance and finite supply.
+       * - `collection`: The collection of the item to be minted.
+       * - `item`: An identifier of the new item.
+       * - `amount`: Supply amount.
        * 
        * Emits `ItemAdded` event when successful.
        * 
@@ -240,6 +238,61 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       cancelTrade: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, tradeType: GafiSupportGameTypesTradeType | 'SetPrice' | 'SetBuy' | 'Bundle' | 'Wishlist' | 'Auction' | 'Swap' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, GafiSupportGameTypesTradeType]>;
       /**
+       * Handling an auction after it's over.
+       * 
+       * The last bidder will win the auction.
+       * If there is no bid, the NFT in the auction will be refunded.
+       * 
+       * Origin must be Signed.
+       * 
+       * - `trade`: The auction id.
+       * 
+       * Emits `AuctionClaimed`.
+       * 
+       * Weight: `O(1)`
+       **/
+      claimAuction: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
+      /**
+       * Sell ​​`amount` of the item for `set_buy`.
+       * 
+       * Origin must be Signed.
+       * 
+       * - `trade`: The set_buy trade id.
+       * - `amount`: The amount of items to sell.
+       * - `ask_price`: The price that the sender willing to accept.
+       * 
+       * Emits `BuySet`.
+       * 
+       * Weight: `O(1)`
+       **/
+      claimSetBuy: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, amount: u32 | AnyNumber | Uint8Array, askPrice: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32, u128]>;
+      /**
+       * Make an exchange for `set_swap`.
+       * 
+       * Origin must be Signed.
+       * 
+       * - `trade`: The set_swap trade id.
+       * - `maybe_bid_price`: Maybe a price sender willing to pay.
+       * 
+       * Emits `SwapClaimed`.
+       * 
+       * Weight: `O(1)`
+       **/
+      claimSwap: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, maybeBidPrice: Option<u128> | null | Uint8Array | u128 | AnyNumber) => SubmittableExtrinsic<ApiType>, [u32, Option<u128>]>;
+      /**
+       * Sell the bundle for `set_wishlist`.
+       * 
+       * Origin must be Signed.
+       * 
+       * - `trade`:  The set_wishlist trade id.
+       * - `ask_price`: The price the sender is willing to accept.
+       * 
+       * Emits `WishlistFilled`.
+       * 
+       * Weight: `O(1)`
+       **/
+      claimWishlist: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, askPrice: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u128]>;
+      /**
        * Clear an attribute for a collection or item.
        * 
        * Simply re-call `clear_attribute` of `pallet-nfts`.
@@ -295,21 +348,6 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       clearMetadata: AugmentedSubmittable<(collection: u32 | AnyNumber | Uint8Array, item: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32]>;
       /**
-       * Handling an auction after it's over.
-       * 
-       * The last bidder will win the auction.
-       * If there is no bid, the NFT in the auction will be refunded.
-       * 
-       * Origin must be Signed.
-       * 
-       * - `trade`: The auction id.
-       * 
-       * Emits `AuctionClaimed`.
-       * 
-       * Weight: `O(1)`
-       **/
-      closeAuction: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
-      /**
        * Create a new collection.
        * 
        * This new collection has no items initially and its owner is the origin.
@@ -328,15 +366,15 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       createCollection: AugmentedSubmittable<(admin: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress]>;
       /**
-       * Create a dynamic minting pool.
+       * Create a dynamic mining pool.
        * 
        * Origin must be Signed and the sender should have sufficient items in the `loot_table`.
        * 
-       * Note: The minting chance will be changed after each NFT is minted.
+       * Note: The mining chance will be changed after each NFT is minted.
        * 
-       * - `loot_table`: A bundle of NFTs for minting.
-       * - `admin`: The Admin of this minting pool.
-       * - `mint_settings`: The minting pool settings.
+       * - `loot_table`: A bundle of NFTs for mining.
+       * - `admin`: The Admin of this mining pool.
+       * - `mint_settings`: The mining pool settings.
        * 
        * Emits `MiningPoolCreated`.
        * 
@@ -385,40 +423,24 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * Weight: `O(1)`
        **/
-      createItem: AugmentedSubmittable<(collection: u32 | AnyNumber | Uint8Array, item: u32 | AnyNumber | Uint8Array, maybeSupply: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [u32, u32, Option<u32>]>;
+      createItem: AugmentedSubmittable<(collection: u32 | AnyNumber | Uint8Array, item: u32 | AnyNumber | Uint8Array, config: PalletNftsItemConfig | { settings?: any } | string | Uint8Array, maybeSupply: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [u32, u32, PalletNftsItemConfig, Option<u32>]>;
       /**
-       * Create a stable minting pool.
+       * Create a stable mining pool.
        * 
        * Origin must be Signed and the sender should be the owner of all collections in the
        * `loot_table`. Collection in `loot_table` must be infinite supply.
        * 
-       * Note: The minting chance will not be changed after each NFT is minted.
+       * Note: The mining chance will not be changed after each NFT is minted.
        * 
-       * - `loot_table`: A bundle of NFTs for minting.
-       * - `admin`: The Admin of this minting pool.
-       * - `mint_settings`: The minting pool settings.
+       * - `loot_table`: A bundle of NFTs for mining.
+       * - `admin`: The Admin of this mining pool.
+       * - `mint_settings`: The mining pool settings.
        * 
        * Emits `MiningPoolCreated`.
        * 
        * Weight: `O(1)`
        **/
       createStablePool: AugmentedSubmittable<(lootTable: Vec<GafiSupportGameTypesLoot> | (GafiSupportGameTypesLoot | { maybeNft?: any; weight?: any } | string | Uint8Array)[], admin: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, mintSettings: GafiSupportGameTypesMintSettings | { mintType?: any; price?: any; startBlock?: any; endBlock?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Vec<GafiSupportGameTypesLoot>, MultiAddress, GafiSupportGameTypesMintSettings]>;
-      /**
-       * Set a swap to exchange `source` to `required`.
-       * 
-       * Origin must be Signed and the sender must be the owner of `source`.
-       * 
-       * - `source`: Bundle in.
-       * - `required`: Bundle out.
-       * - `maybe_price`: Maybe the price that sender willing to accept.
-       * - `start_block`: The block to start set swap, `None` indicates the current block.
-       * - `end_block`: The block to end set swap, `None` indicates no end.
-       * 
-       * Emits `SwapSet`.
-       * 
-       * Weight: `O(1)`
-       **/
-      createSwap: AugmentedSubmittable<(source: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], required: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], maybePrice: Option<u128> | null | Uint8Array | u128 | AnyNumber, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, endBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [Vec<GafiSupportGameTypesPackage>, Vec<GafiSupportGameTypesPackage>, Option<u128>, Option<u32>, Option<u32>]>;
       /**
        * Disallow further unprivileged transfer or trade of an item.
        * Simply re-call `lock_item_transfer` of `pallet-nfts`.
@@ -434,33 +456,19 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       lockItemTransfer: AugmentedSubmittable<(collection: u32 | AnyNumber | Uint8Array, item: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32]>;
       /**
-       * Make an exchange for `create_swap`.
+       * Mint an amount of item on a particular mining pool.
        * 
-       * Origin must be Signed.
+       * The origin must be Signed and the sender must comply with the `mint_settings` rules.
        * 
-       * - `trade`: The create_swap trade id.
-       * - `maybe_bid_price`: Maybe a price sender willing to pay.
+       * - `pool`: The pool to be minted.
+       * - `mint_to`: Account into which the item will be minted.
+       * - `amount`: The amount may be minted.
        * 
-       * Emits `SwapClaimed`.
-       * 
-       * Weight: `O(1)`
-       **/
-      makeSwap: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, maybeBidPrice: Option<u128> | null | Uint8Array | u128 | AnyNumber) => SubmittableExtrinsic<ApiType>, [u32, Option<u128>]>;
-      /**
-       * Set up a purchase for `bundle`.
-       * 
-       * Origin must be Signed.
-       * 
-       * - `bundle`:  A group of items may be from different collections want to buy.
-       * - `price`: The price the sender is willing to pay.
-       * - `start_block`: The block to start set wishlist, `None` indicates the current block.
-       * - `end_block`: The block to end set wishlist, `None` indicates no end.
-       * 
-       * Emits `WishlistSet`.
+       * Emits `Minted` event when successful.
        * 
        * Weight: `O(1)`
        **/
-      orderBundle: AugmentedSubmittable<(bundle: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], price: u128 | AnyNumber | Uint8Array, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, endBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [Vec<GafiSupportGameTypesPackage>, u128, Option<u32>, Option<u32>]>;
+      mint: AugmentedSubmittable<(pool: u32 | AnyNumber | Uint8Array, mintTo: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, amount: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, MultiAddress, u32]>;
       /**
        * Remove a collection in the game.
        * 
@@ -474,47 +482,6 @@ declare module '@polkadot/api-base/types/submittable' {
        * Weight: `O(1)`
        **/
       removeCollection: AugmentedSubmittable<(game: u32 | AnyNumber | Uint8Array, collection: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32]>;
-      /**
-       * Mint an amount of item on a particular minting pool.
-       * 
-       * The origin must be Signed and the sender must comply with the `mint_settings` rules.
-       * 
-       * - `pool`: The pool to be minted.
-       * - `mint_to`: Account into which the item will be minted.
-       * - `amount`: The amount may be minted.
-       * 
-       * Emits `Minted` event when successful.
-       * 
-       * Weight: `O(1)`
-       **/
-      requestMint: AugmentedSubmittable<(pool: u32 | AnyNumber | Uint8Array, mintTo: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, amount: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, MultiAddress, u32]>;
-      /**
-       * Sell the bundle for `order_bundle`.
-       * 
-       * Origin must be Signed.
-       * 
-       * - `trade`:  The order_bundle trade id.
-       * - `ask_price`: The price the sender is willing to accept.
-       * 
-       * Emits `WishlistFilled`.
-       * 
-       * Weight: `O(1)`
-       **/
-      sellBundle: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, askPrice: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u128]>;
-      /**
-       * Sell ​​`amount` of the item for `set_order`.
-       * 
-       * Origin must be Signed.
-       * 
-       * - `trade`: The set_order trade id.
-       * - `amount`: The amount of items to sell.
-       * - `ask_price`: The price that the sender willing to accept.
-       * 
-       * Emits `BuySet`.
-       * 
-       * Weight: `O(1)`
-       **/
-      sellItem: AugmentedSubmittable<(trade: u32 | AnyNumber | Uint8Array, amount: u32 | AnyNumber | Uint8Array, askPrice: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32, u128]>;
       /**
        * Set acceptance of ownership for a particular account.
        * 
@@ -561,14 +528,14 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * - `source`: The bundle for auction.
        * - `maybe_price`: Maybe a minimum bid.
-       * - `start_block`: The block to start the auction, `None` indicates the current block.
-       * - `duration`: The duration of the auction measured by the number of blocks.
+       * - `start_block`: The block to start the auction.
+       * - `duration`: The duration of the auction and measured by the number of blocks.
        * 
        * Emits `AuctionSet`.
        * 
        * Weight: `O(1)`
        **/
-      setAuction: AugmentedSubmittable<(source: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], maybePrice: Option<u128> | null | Uint8Array | u128 | AnyNumber, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, duration: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Vec<GafiSupportGameTypesPackage>, Option<u128>, Option<u32>, u32]>;
+      setAuction: AugmentedSubmittable<(source: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], maybePrice: Option<u128> | null | Uint8Array | u128 | AnyNumber, startBlock: u32 | AnyNumber | Uint8Array, duration: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Vec<GafiSupportGameTypesPackage>, Option<u128>, u32, u32]>;
       /**
        * Set the price for the `bundle`.
        * 
@@ -576,15 +543,31 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * - `bundle`: A group of items may be from different collections to set price for.
        * - `price`: The price the `bundle`.
-       * - `start_block`: The block to start setting the price, `None` indicates the current
-       * block.
-       * - `end_block`: The block to end setting the price, `None` indicates no end.
+       * - `start_block`: The block to start setting the price.
+       * - `end_block`: The block to end setting the price.
        * 
        * Emits `BundleSet`.
        * 
        * Weight: `O(1)`
        **/
       setBundle: AugmentedSubmittable<(bundle: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], price: u128 | AnyNumber | Uint8Array, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, endBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [Vec<GafiSupportGameTypesPackage>, u128, Option<u32>, Option<u32>]>;
+      /**
+       * Set up a purchase for `package`.
+       * 
+       * It is possible to trade for a small part of the `package`.
+       * 
+       * Origin must be Signed.
+       * 
+       * - `package`: A number of an item in a collection want to buy.
+       * - `unit_price`: The price of each item the sender is willing to pay.
+       * - `start_block`: The block to start set buy.
+       * - `end_block`: The block to end set buy.
+       * 
+       * Emits `BuySet`.
+       * 
+       * Weight: `O(1)`
+       **/
+      setBuy: AugmentedSubmittable<(package: GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array, unitPrice: u128 | AnyNumber | Uint8Array, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, endBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [GafiSupportGameTypesPackage, u128, Option<u32>, Option<u32>]>;
       /**
        * Set the metadata for a collection.
        * 
@@ -628,38 +611,36 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       setMetadata: AugmentedSubmittable<(collection: u32 | AnyNumber | Uint8Array, item: u32 | AnyNumber | Uint8Array, data: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32, Bytes]>;
       /**
-       * Set up a purchase for `package`.
-       * 
-       * It is possible to trade for a small part of the `package`.
-       * 
-       * Origin must be Signed.
-       * 
-       * - `package`: A number of an item in a collection want to buy.
-       * - `unit_price`: The price of each item the sender is willing to pay.
-       * - `start_block`: The block to start set buy.
-       * - `end_block`: The block to end set buy.
-       * 
-       * Emits `BuySet`.
-       * 
-       * Weight: `O(1)`
-       **/
-      setOrder: AugmentedSubmittable<(package: GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array, unitPrice: u128 | AnyNumber | Uint8Array, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, endBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [GafiSupportGameTypesPackage, u128, Option<u32>, Option<u32>]>;
-      /**
-       * Set the price for NFTs within a collection.
+       * Set the price for a package.
        * 
        * Origin must be Signed and must be the owner of the `item`.
        * 
        * - `package`: a number of an item in a collection to set the price for.
        * - `unit_price`: The price for each item.
-       * - `start_block`: The block to start setting the price, `None` indicates the current
-       * block.
-       * - `end_block`: The block to end setting the price, `None` indicates no end.
+       * - `start_block`: The block to start setting the price.
+       * - `end_block`: The block to end setting the price.
        * 
        * Emits `PriceSet`.
        * 
        * Weight: `O(1)`
        **/
       setPrice: AugmentedSubmittable<(package: GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array, unitPrice: u128 | AnyNumber | Uint8Array, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, endBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [GafiSupportGameTypesPackage, u128, Option<u32>, Option<u32>]>;
+      /**
+       * Set a swap to exchange `source` to `required`.
+       * 
+       * Origin must be Signed and the sender must be the owner of `source`.
+       * 
+       * - `source`: Bundle in.
+       * - `required`: Bundle out.
+       * - `maybe_price`: Maybe the price that sender willing to accept.
+       * - `start_block`: The block to start set swap.
+       * - `end_block`: The block to end set swap.
+       * 
+       * Emits `SwapSet`.
+       * 
+       * Weight: `O(1)`
+       **/
+      setSwap: AugmentedSubmittable<(source: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], required: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], maybePrice: Option<u128> | null | Uint8Array | u128 | AnyNumber, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, endBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [Vec<GafiSupportGameTypesPackage>, Vec<GafiSupportGameTypesPackage>, Option<u128>, Option<u32>, Option<u32>]>;
       /**
        * Change the Issuer, Admin and Freezer of a collection.
        * 
@@ -701,16 +682,41 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       setUpgradeItem: AugmentedSubmittable<(collection: u32 | AnyNumber | Uint8Array, item: u32 | AnyNumber | Uint8Array, newItem: u32 | AnyNumber | Uint8Array, config: PalletNftsItemConfig | { settings?: any } | string | Uint8Array, data: Bytes | string | Uint8Array, level: u32 | AnyNumber | Uint8Array, fee: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32, u32, PalletNftsItemConfig, Bytes, u32, u128]>;
       /**
-       * Transfers a specified amount of an item between accounts within a collection.
+       * Set up a purchase for `bundle`.
        * 
-       * # Parameters
+       * Origin must be Signed.
        * 
-       * - `origin`: Origin must be signed, indicating the sender.
-       * - `collection`: Collection identifier.
-       * - `item`: Item identifier.
-       * - `dest`: Destination account lookup.
-       * - `amount`: Amount of the item to transfer.
+       * - `bundle`:  A group of items may be from different collections want to buy.
+       * - `price`: The price the sender is willing to pay.
+       * - `start_block`: The block to start set wishlist.
+       * - `end_block`: The block to end set wishlist.
        * 
+       * Emits `WishlistSet`.
+       * 
+       * Weight: `O(1)`
+       **/
+      setWishlist: AugmentedSubmittable<(bundle: Vec<GafiSupportGameTypesPackage> | (GafiSupportGameTypesPackage | { collection?: any; item?: any; amount?: any } | string | Uint8Array)[], price: u128 | AnyNumber | Uint8Array, startBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber, endBlock: Option<u32> | null | Uint8Array | u32 | AnyNumber) => SubmittableExtrinsic<ApiType>, [Vec<GafiSupportGameTypesPackage>, u128, Option<u32>, Option<u32>]>;
+      /**
+       * Submit random seed from offchain-worker to runtime.
+       * 
+       * Only called by offchain-worker.
+       * 
+       * Arguments:
+       * - `seed`: random seed value.
+       * 
+       * Weight: `O(1)`
+       **/
+      submitRandomSeedUnsigned: AugmentedSubmittable<(seed: U8aFixed | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [U8aFixed]>;
+      /**
+       * Move an item from the sender account to another.
+       * 
+       * Origin must be Signed and the signing account must be the owner of the `item`.
+       * 
+       * Arguments:
+       * - `collection`: The collection of the item to be transferred.
+       * - `item`: The item to be transferred.
+       * - `dest`: The account to receive ownership of the item.
+       * - `amount`: The amount of item to be transferred.
        * 
        * Emits `Transferred`.
        * 
@@ -748,24 +754,6 @@ declare module '@polkadot/api-base/types/submittable' {
        * Weight: `O(1)`
        **/
       upgradeItem: AugmentedSubmittable<(collection: u32 | AnyNumber | Uint8Array, item: u32 | AnyNumber | Uint8Array, amount: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32, u32]>;
-      /**
-       * Generic tx
-       **/
-      [key: string]: SubmittableExtrinsicFunction<ApiType>;
-    };
-    gameRandomness: {
-      /**
-       * Submit a new random seed.
-       * 
-       * This function sets a new `seed` for randomness in every `T::UnsignedInterval` blocks.
-       * 
-       * # Parameters
-       * 
-       * - `origin`: Accepted only by the off-chain worker.
-       * - `block_number`: Current block number.
-       * - `seed`: New random seed.
-       **/
-      submitRandomSeedUnsigned: AugmentedSubmittable<(blockNumber: u32 | AnyNumber | Uint8Array, seed: U8aFixed | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, U8aFixed]>;
       /**
        * Generic tx
        **/

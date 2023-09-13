@@ -223,8 +223,8 @@ function AccountOwnerService({
               >
                 <RatioPicture
                   src={
-                    currentMetaNFT?.image
-                      ? cloundinary_link(currentMetaNFT.image)
+                    currentMetaNFT?.avatar
+                      ? cloundinary_link(currentMetaNFT.avatar)
                       : null
                   }
                   sx={{ height: 56, borderRadius: 'inherit' }}
@@ -232,11 +232,11 @@ function AccountOwnerService({
 
                 <Box padding={4} position="relative" fontWeight="medium">
                   <Text as="strong" fontSize="sm" color="shader.a.500">
-                    {currentMetaCollection?.title || '-'}
+                    {currentMetaCollection?.title || 'unknown'}
                   </Text>
 
                   <Center justifyContent="space-between" color="shader.a.900">
-                    <Text>{currentMetaNFT?.title || '-'}</Text>
+                    <Text>{currentMetaNFT?.title || 'unknown'}</Text>
 
                     <Text as="span" fontSize="sm">
                       ID: {meta.nft_id}

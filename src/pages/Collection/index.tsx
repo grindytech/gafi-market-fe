@@ -58,8 +58,8 @@ export default function Collection() {
           <Center height={80} position="relative">
             <RatioPicture
               src={
-                MetaCollection?.[0]?.image
-                  ? cloundinary_link(MetaCollection[0].image)
+                MetaCollection?.[0]?.avatar
+                  ? cloundinary_link(MetaCollection[0].avatar)
                   : null
               }
               sx={{ height: 'full', width: 'full', pointerEvents: 'none' }}
@@ -74,8 +74,8 @@ export default function Collection() {
 
             <RatioPicture
               src={
-                MetaCollection?.[0]?.image
-                  ? cloundinary_link(MetaCollection[0].image)
+                MetaCollection?.[0]?.avatar
+                  ? cloundinary_link(MetaCollection[0].avatar)
                   : null
               }
               sx={{
@@ -91,7 +91,7 @@ export default function Collection() {
 
           <Center pt={20} pb={6} flexDirection="column" textAlign="center">
             <Heading fontSize="2xl" color="shader.a.900">
-              {MetaCollection?.[0]?.title || '-'}
+              {MetaCollection?.[0]?.title || 'unknown'}
             </Heading>
 
             <Text

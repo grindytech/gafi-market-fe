@@ -1,11 +1,11 @@
 import { cloundinary_link } from 'axios/cloudinary_axios';
 import CardBox from 'components/CardBox';
 import RatioPicture from 'components/RatioPicture';
+import { MetaNFTFieldProps } from 'hooks/useMetaNFT';
 import { PropsWithChildren } from 'react';
-import { TypeMetadataOfItem } from 'types';
 
 interface BundleLayoutModelProps extends PropsWithChildren {
-  metaNFT: TypeMetadataOfItem[] | undefined;
+  metaNFT: MetaNFTFieldProps[] | undefined;
   bundleOf: { collection_id: number; nft_id: number };
 }
 
@@ -28,7 +28,9 @@ export default ({ bundleOf, metaNFT, children }: BundleLayoutModelProps) => {
     >
       <RatioPicture
         src={
-          currentMetaNFT?.image ? cloundinary_link(currentMetaNFT.image) : null
+          currentMetaNFT?.avatar
+            ? cloundinary_link(currentMetaNFT.avatar)
+            : null
         }
         sx={{ ratio: { base: 16 / 9, lg: 1 / 1 } }}
       />

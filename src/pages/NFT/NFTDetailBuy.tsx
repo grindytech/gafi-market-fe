@@ -39,6 +39,10 @@ interface NFTDetailBuyProps {
   refetch: () => void;
 }
 
+interface NFTDetailBuyFieldProps {
+  supply: number;
+}
+
 export default function NFTDetailBuy({
   trade_id,
   fee,
@@ -55,7 +59,9 @@ export default function NFTDetailBuy({
     watch,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm<NFTDetailBuyFieldProps>();
+
+  const { supply } = watch();
 
   const { metaNFT } = useMetaNFT({
     key: `nft_detail/${nft_id}/${collection_id}`,
@@ -71,15 +77,13 @@ export default function NFTDetailBuy({
 
   const { isLoading, mutation } = useItemBought({
     trade_id,
-    amount: watch().amount,
+    amount: supply,
     bidPrice: amount * fee,
     refetch() {
       refetch();
       onClose();
     },
   });
-
-  const { amount: supply } = watch();
 
   return (
     <Button
@@ -153,8 +157,8 @@ export default function NFTDetailBuy({
                   <RatioPicture
                     alt={nft_id}
                     src={
-                      metaNFT?.[0]?.image
-                        ? cloundinary_link(metaNFT?.[0]?.image)
+                      metaNFT?.[0]?.avatar
+                        ? cloundinary_link(metaNFT?.[0]?.avatar)
                         : null
                     }
                     sx={{ width: 32 }}
@@ -162,7 +166,7 @@ export default function NFTDetailBuy({
 
                   <Box>
                     <Text color="primary.a.500" fontWeight="medium">
-                      {MetaCollection?.[0]?.title || '-'}
+                      {MetaCollection?.[0]?.title || 'unknown'}
                     </Text>
 
                     <Text
@@ -171,7 +175,7 @@ export default function NFTDetailBuy({
                       fontWeight="semibold"
                       fontSize="xl"
                     >
-                      {metaNFT?.[0]?.title || '-'}
+                      {metaNFT?.[0]?.title || 'unknown'}
                       <Text
                         as="strong"
                         fontWeight="medium"
@@ -214,11 +218,11 @@ export default function NFTDetailBuy({
                 </Box>
               </Flex>
 
-              <FormControl isRequired={true} isInvalid={!!errors.amount}>
+              <FormControl isRequired={true} isInvalid={!!errors.supply}>
                 <Input
                   placeholder="Enter supply"
                   isRequired={false}
-                  {...register('amount', { required: true })}
+                  {...register('supply', { required: true })}
                 />
               </FormControl>
             </ModalBody>

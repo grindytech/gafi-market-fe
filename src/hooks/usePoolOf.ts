@@ -21,7 +21,7 @@ export interface usePoolOfProps {
 export default function usePoolOf({ filter, arg, key }: usePoolOfProps) {
   const { api } = useAppSelector(state => state.substrate);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['poolOf', key],
     queryFn: async () => {
       if (api) {
@@ -74,5 +74,6 @@ export default function usePoolOf({ filter, arg, key }: usePoolOfProps) {
   return {
     poolOf: data,
     isLoading,
+    isError,
   };
 }

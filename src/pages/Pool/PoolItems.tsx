@@ -10,14 +10,15 @@ import { useParams } from 'react-router-dom';
 import { lootTableOfProps } from 'hooks/useLootTableOf';
 import { CalculatorOfRarity, ColorOfRarity } from 'utils/utils';
 import useSupplyOf from 'hooks/useSupplyOf';
-import { TypeMetadataOfItem } from 'types';
 import { PoolServiceProps } from '.';
+import { MetaNFTFieldProps } from 'hooks/useMetaNFT';
+import { isNull } from '@polkadot/util';
 
 interface PoolItemsProps {
   setThumbsSwiper: React.Dispatch<SwiperType>;
   lootTableOf: lootTableOfProps[];
   source: PoolServiceProps['source'];
-  metaNFT: TypeMetadataOfItem[] | undefined;
+  metaNFT: MetaNFTFieldProps[] | undefined;
 }
 
 export default ({
@@ -29,7 +30,7 @@ export default ({
   const { id } = useParams();
 
   const { supplyOf } = useSupplyOf({
-    key: `mint_detail/${id}`,
+    key: `pool_detail/${id}`,
     filter: 'collection_id',
     arg: source.map(({ maybeNfT }) => [
       maybeNfT.collection_id,
@@ -88,8 +89,8 @@ export default ({
                   >
                     <RatioPicture
                       src={
-                        currentMetaNFT?.image
-                          ? cloundinary_link(currentMetaNFT.image)
+                        currentMetaNFT?.avatar
+                          ? cloundinary_link(currentMetaNFT.avatar)
                           : null
                       }
                       sx={{ width: 20, height: 20 }}
@@ -104,7 +105,7 @@ export default ({
                               color="shader.a.1000"
                               fontWeight="medium"
                             >
-                              {currentMetaNFT?.title || '-'}&nbsp;
+                              {currentMetaNFT?.title || 'unknown'}&nbsp;
                               <Text
                                 as="span"
                                 fontSize="sm"
@@ -128,7 +129,9 @@ export default ({
                           </Box>
 
                           <Text color="shader.a.1000" fontWeight="medium">
-                            {currentSupply?.supply}/500
+                            {isNull(currentSupply?.supply)
+                              ? 'Infinity'
+                              : currentSupply?.supply}
                           </Text>
                         </Center>
                       ) : (
@@ -150,7 +153,7 @@ export default ({
                         mt={4}
                         height={2}
                         borderRadius="lg"
-                        value={rarity as never}
+                        value={Number(rarity)}
                         bg="shader.a.300"
                         sx={{
                           div: {

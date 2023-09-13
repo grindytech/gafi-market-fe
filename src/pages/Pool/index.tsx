@@ -1,4 +1,4 @@
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Center, CircularProgress, Flex } from '@chakra-ui/react';
 
 import CardBox from 'components/CardBox';
 import useLootTableOf, { lootTableOfProps } from 'hooks/useLootTableOf';
@@ -35,14 +35,15 @@ export interface PoolServiceProps {
 
 export default () => {
   const { id } = useParams();
+  const navigation = useNavigate();
 
-  const { poolOf } = usePoolOf({
+  const { poolOf, isLoading } = usePoolOf({
     key: `pool_detail/${id}`,
     filter: 'pool_id',
     arg: [Number(id)],
   });
 
-  const { lootTableOf } = useLootTableOf({
+  const { lootTableOf, isLoading: lootLoading } = useLootTableOf({
     key: `pool_detail/${id}`,
     filter: 'pool_id',
     arg: [Number(id)],
@@ -52,27 +53,10 @@ export default () => {
     meta => !!meta.maybeNfT
   ) as PoolServiceProps['source'];
 
-  return (
-    <>
-      {poolOf?.length && lootTableOf?.length ? (
-        <PoolServiceProps
-          poolOf={poolOf}
-          lootTableOf={lootTableOf}
-          source={source}
-        />
-      ) : null}
-    </>
-  );
-};
-
-function PoolServiceProps({ poolOf, lootTableOf, source }: PoolServiceProps) {
-  const { id } = useParams();
-  const navigation = useNavigate();
-
   const { metaNFT } = useMetaNFT({
-    key: `mint_detail/${id}`,
+    key: `pool_detail/${id}/isLoading=${lootLoading}`,
     filter: 'collection_id',
-    arg: source.map(({ maybeNfT }) => ({
+    arg: source?.map(({ maybeNfT }) => ({
       collection_id: maybeNfT.collection_id,
       nft_id: maybeNfT.nft_id,
     })),
@@ -100,66 +84,73 @@ function PoolServiceProps({ poolOf, lootTableOf, source }: PoolServiceProps) {
     },
   ];
 
+  if (isLoading)
+    return (
+      <Center height="100vh">
+        <CircularProgress isIndeterminate color="second.purple" />
+      </Center>
+    );
+
+  if (!poolOf?.length) return <Center height="100vh">Not Found</Center>;
+
   return (
-    <DefaultDetail>
-      <BundleLayoutModelSwiper
-        bundleOf={
-          lootTableOf.map(({ maybeNfT }) => ({
-            collection_id: maybeNfT?.collection_id,
-            nft_id: maybeNfT?.nft_id,
-          })) as never
-        }
-        swiperRef={swiperRef}
-        thumbs={thumbsSwiper}
-        metaNFT={metaNFT}
-      >
-        <BundleLayoutSocial />
-
-        <BundleLayoutMenu menu={ListMenu} />
-      </BundleLayoutModelSwiper>
-
-      <Box>
-        <CardBox variant="baseStyle">
-          <BundleLayoutCardHeading>
-            <BundleLayoutHeading heading="Mint detail" />
-
-            <BundleLayoutOwner owner={String(poolOf[0].owner)} />
+    <>
+      {poolOf?.length && lootTableOf?.length ? (
+        <DefaultDetail>
+          <BundleLayoutModelSwiper
+            bundleOf={source.map(({ maybeNfT }) => ({
+              collection_id: maybeNfT?.collection_id,
+              nft_id: maybeNfT?.nft_id,
+            }))}
+            swiperRef={swiperRef}
+            thumbs={thumbsSwiper}
+            metaNFT={metaNFT}
+          >
+            <BundleLayoutSocial />
 
             <BundleLayoutMenu menu={ListMenu} />
-          </BundleLayoutCardHeading>
+          </BundleLayoutModelSwiper>
 
-          <CardBox variant="baseStyle" padding={0}>
-            <BundleLayoutExpires
-              end={poolOf[0].endBlock.isEmpty ? 'Infinity' : 'Expired'}
-              heading="Pool"
-              endBlock={
-                poolOf[0].endBlock.isSome
-                  ? poolOf[0].endBlock.value.toNumber()
-                  : -1
-              }
-            />
+          <Box>
+            <CardBox variant="baseStyle">
+              <BundleLayoutCardHeading>
+                <BundleLayoutHeading heading="Mint detail" />
 
-            <BundleLayoutPrice amount={formatGAFI(poolOf[0].price)} />
+                <BundleLayoutOwner owner={poolOf[0].owner} />
 
-            <Flex gap={2} padding={6} pt={0}>
-              <PoolNow
-                pool_id={Number(id)}
-                price={poolOf[0].price}
-                metaNFT={metaNFT}
-              />
-            </Flex>
-          </CardBox>
+                <BundleLayoutMenu menu={ListMenu} />
+              </BundleLayoutCardHeading>
 
-          <CardBox variant="baseStyle" mt={4}>
-            <PoolItems
-              lootTableOf={lootTableOf}
-              source={source}
-              setThumbsSwiper={setThumbsSwiper}
-              metaNFT={metaNFT}
-            />
-          </CardBox>
-        </CardBox>
-      </Box>
-    </DefaultDetail>
+              <CardBox variant="baseStyle" padding={0}>
+                <BundleLayoutExpires
+                  end={poolOf[0].endBlock.isEmpty ? 'Infinity' : 'Expired'}
+                  heading="Pool"
+                  endBlock={
+                    poolOf[0].endBlock.isSome
+                      ? poolOf[0].endBlock.value.toNumber()
+                      : -1
+                  }
+                />
+
+                <BundleLayoutPrice amount={formatGAFI(poolOf[0].price)} />
+
+                <Flex gap={2} padding={6} pt={0}>
+                  <PoolNow pool_id={Number(id)} price={poolOf[0].price} />
+                </Flex>
+              </CardBox>
+
+              <CardBox variant="baseStyle" mt={4}>
+                <PoolItems
+                  lootTableOf={lootTableOf}
+                  source={source}
+                  setThumbsSwiper={setThumbsSwiper}
+                  metaNFT={metaNFT}
+                />
+              </CardBox>
+            </CardBox>
+          </Box>
+        </DefaultDetail>
+      ) : null}
+    </>
   );
-}
+};

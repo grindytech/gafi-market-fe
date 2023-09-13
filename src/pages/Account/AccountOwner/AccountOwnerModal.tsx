@@ -133,8 +133,8 @@ export default function AccountOwnerModal({
                 >
                   <RatioPicture
                     src={
-                      currentMetaNFT?.image
-                        ? cloundinary_link(currentMetaNFT.image)
+                      currentMetaNFT?.avatar
+                        ? cloundinary_link(currentMetaNFT.avatar)
                         : null
                     }
                     sx={{ width: 20, height: 20 }}

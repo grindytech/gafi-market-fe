@@ -5,13 +5,13 @@ import SwiperThumbs from 'layouts/SwiperThumbs';
 import SwiperThumbsButton from 'layouts/SwiperThumbs/SwiperThumbsButton';
 import React, { PropsWithChildren } from 'react';
 import { SwiperSlide } from 'swiper/react';
-import { TypeMetadataOfItem } from 'types';
 import { Swiper as SwiperType } from 'swiper/types';
+import { MetaNFTFieldProps } from 'hooks/useMetaNFT';
 
 interface BundleLayoutModelSwiper extends PropsWithChildren {
   swiperRef: React.MutableRefObject<SwiperType | undefined>;
   thumbs: SwiperType | null;
-  metaNFT: TypeMetadataOfItem[] | undefined;
+  metaNFT: MetaNFTFieldProps[] | undefined;
   bundleOf: { collection_id: number; nft_id: number }[];
 }
 
@@ -26,7 +26,7 @@ export default ({
     <CardBox
       variant="baseStyle"
       padding={0}
-      position={{ lg: 'sticky' }}
+      position={{ base: 'relative', lg: 'sticky' }}
       top={24}
       overflow="hidden"
       height="fit-content"
@@ -46,8 +46,8 @@ export default ({
               <SwiperSlide>
                 <RatioPicture
                   src={
-                    currentMetaNFT?.image
-                      ? cloundinary_link(currentMetaNFT.image)
+                    currentMetaNFT?.avatar
+                      ? cloundinary_link(currentMetaNFT.avatar)
                       : null
                   }
                   sx={{ ratio: { base: 16 / 9, lg: 1 / 1 } }}
