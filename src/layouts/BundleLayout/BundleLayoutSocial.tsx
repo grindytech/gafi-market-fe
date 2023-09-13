@@ -7,10 +7,9 @@ export default () => {
   return (
     <List
       position="absolute"
-      transform="translateY(-100%)"
+      inset="auto 0 0 0"
       zIndex="docked"
       bg="white"
-      inset="auto 0 auto 0"
       padding={6}
       display="flex"
       fontWeight="medium"

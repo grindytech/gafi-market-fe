@@ -135,15 +135,11 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       lootTableOf: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Vec<GafiSupportGameTypesLoot>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**
-       * Storing mint request
-       **/
-      mintRequestOf: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Vec<PalletGameMintRequest>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
-      /**
        * Storing next game id
        **/
       nextGameId: AugmentedQuery<ApiType, () => Observable<Option<u32>>, []> & QueryableStorageEntry<ApiType, []>;
       /**
-       * Storing next minting pool id
+       * Storing next mining pool id
        **/
       nextPoolId: AugmentedQuery<ApiType, () => Observable<Option<u32>>, []> & QueryableStorageEntry<ApiType, []>;
       /**
@@ -155,7 +151,7 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       originItemOf: AugmentedQuery<ApiType, (arg: ITuple<[u32, u32]> | [u32 | AnyNumber | Uint8Array, u32 | AnyNumber | Uint8Array]) => Observable<Option<ITuple<[u32, u32]>>>, [ITuple<[u32, u32]>]> & QueryableStorageEntry<ApiType, [ITuple<[u32, u32]>]>;
       /**
-       * Storing minting pool configuration
+       * Storing mining pool configuration
        **/
       poolOf: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletGamePoolDetails>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**
@@ -178,24 +174,6 @@ declare module '@polkadot/api-base/types/storage' {
        * Storing the upgrade config
        **/
       upgradeConfigOf: AugmentedQuery<ApiType, (arg1: u32 | AnyNumber | Uint8Array, arg2: u32 | AnyNumber | Uint8Array, arg3: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletGameUpgradeItemConfig>>, [u32, u32, u32]> & QueryableStorageEntry<ApiType, [u32, u32, u32]>;
-      /**
-       * Generic query
-       **/
-      [key: string]: QueryableStorageEntry<ApiType>;
-    };
-    gameRandomness: {
-      /**
-       * Defines the block when next unsigned transaction will be accepted.
-       * 
-       * To prevent spam of unsigned (and unpaid!) transactions on the network,
-       * we only allow one transaction every `T::UnsignedInterval` blocks.
-       * This storage entry defines when new transaction is going to be accepted.
-       **/
-      nextUnsignedAt: AugmentedQuery<ApiType, () => Observable<u32>, []> & QueryableStorageEntry<ApiType, []>;
-      /**
-       * Storing random seed generated from the off-chain worker.
-       **/
-      randomSeed: AugmentedQuery<ApiType, () => Observable<Option<GameRandomnessSeedPayload>>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * Generic query
        **/

@@ -9,6 +9,13 @@ export interface useBundleOfProps {
   key: string | string[] | number | number[];
 }
 
+export interface BundleOfFieldProps {
+  trade_id: number;
+  collection_id: number;
+  nft_id: number;
+  amount: number;
+}
+
 export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
   const { api } = useAppSelector(state => state.substrate);
 
@@ -29,7 +36,7 @@ export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
               nft_id: meta[0].item.toNumber(),
               amount: meta[0].amount.toNumber(),
             })
-          );
+          ) as BundleOfFieldProps[];
         }
 
         if (filter === 'trade_id' && arg) {
@@ -48,11 +55,8 @@ export default function useBundleOf({ filter, arg, key }: useBundleOfProps) {
               }));
             })
           ).then(data =>
-            data
-              .filter((meta): meta is NonNullable<typeof meta> => !!meta)
-              .flat()
+            data.filter((meta): meta is BundleOfFieldProps[] => !!meta).flat()
           );
-          // not found and fill all array [Array(3)] = [1, 2, X]
         }
       }
 

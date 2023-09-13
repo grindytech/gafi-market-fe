@@ -60,11 +60,11 @@ export default ({
         ...meta,
         nft_meta: {
           title: currentMetaNFT?.title,
-          image: currentMetaNFT?.image,
+          image: currentMetaNFT?.avatar,
         },
         collection_meta: {
           title: currentMetaCollection?.title,
-          image: currentMetaCollection?.image,
+          image: currentMetaCollection?.avatar,
         },
       };
 

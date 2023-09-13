@@ -1,6 +1,6 @@
 import { Box, Center, Flex, Icon, Stack, Text } from '@chakra-ui/react';
 
-import { Mousewheel } from 'swiper';
+import { Grid } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import CollectionIcon from 'public/assets/line/collection-02.svg';
@@ -8,136 +8,193 @@ import CollectionIcon from 'public/assets/line/collection-02.svg';
 import { Link } from 'react-router-dom';
 
 import RatioPicture from 'components/RatioPicture';
-import CardBox from 'components/CardBox';
 
-import { formatGAFI } from 'utils/utils';
+import { convertHex, formatGAFI } from 'utils/utils';
 import DateBlock from 'components/DateBlock';
-import SwiperThumbsButton from 'layouts/SwiperThumbs/SwiperThumbsButton';
-import { Swiper as SwiperType } from 'swiper/types';
-import { useRef } from 'react';
+
 import usePoolOf from 'hooks/usePoolOf';
+import TopPoolsSkeleton from './TopPoolsSkeleton';
+
+import useMetaPool from 'hooks/useMetaPool';
+
+import useLootTableOf from 'hooks/useLootTableOf';
+import useMetaNFT from 'hooks/useMetaNFT';
+import { cloundinary_link } from 'axios/cloudinary_axios';
 
 export default function TopPools() {
-  const { poolOf } = usePoolOf({
-    key: 'topPools',
+  const { poolOf, isLoading } = usePoolOf({
+    key: 'home_TopPools',
     filter: 'entries',
   });
 
-  const swiperRef = useRef<SwiperType>();
+  const { lootTableOf, isLoading: lootLoading } = useLootTableOf({
+    key: `home_TopPools/isLoading=${isLoading}`,
+    filter: 'pool_id',
+    arg: poolOf?.map(({ pool_id }) => pool_id),
+  });
+
+  const { metaNFT } = useMetaNFT({
+    key: `home_TopPools/isLoading=[${isLoading}, ${lootLoading}]`,
+    filter: 'collection_id',
+    arg: lootTableOf
+      ?.filter(meta => !!meta.maybeNfT)
+      .map(({ maybeNfT }) => ({
+        collection_id: maybeNfT?.collection_id as number,
+        nft_id: maybeNfT?.nft_id as number,
+      })),
+  });
+
+  const { MetaPool } = useMetaPool({
+    key: 'home_TopPools',
+    filter: 'entries',
+  });
 
   return (
-    <Stack spacing={6}>
-      <Flex gap={3} alignItems="center">
-        <Icon
-          as={CollectionIcon}
-          width={6}
-          height={6}
-          sx={{
-            path: { stroke: 'url(#CollectionLinear06)' },
-          }}
-        />
+    <Box mt={6} bg="#27272A" padding={6} borderRadius="2xl">
+      <Flex gap={2} alignItems="center">
+        <Center
+          bg={convertHex('#FFC966', 0.1)}
+          borderRadius="3xl"
+          padding={2}
+          color="#FFC966"
+        >
+          <Icon as={CollectionIcon} width={4} height={4} />
+        </Center>
 
-        <Text color="shader.a.900" fontWeight="semibold" fontSize="xl">
+        <Text color="white" fontWeight="semibold" fontSize="xl">
           Top Pools
         </Text>
       </Flex>
 
-      {poolOf?.length ? (
-        <Box role="group" position="relative">
-          {poolOf.length >= 5 && (
-            <SwiperThumbsButton
-              swiperRef={swiperRef}
-              sx={{
-                _first: { left: '-2.5%' },
-                _last: { right: '-2.5%' },
-              }}
-            />
-          )}
+      <Box mt={6}>
+        {isLoading && <TopPoolsSkeleton />}
 
+        {poolOf?.length ? (
           <Swiper
-            loop={true}
-            modules={[Mousewheel]}
-            spaceBetween={32}
-            slidesPerView={4}
-            mousewheel={{ forceToAxis: true }}
-            onSwiper={swiper => (swiperRef.current = swiper)}
+            spaceBetween={20}
+            modules={[Grid]}
             breakpoints={{
-              0: { slidesPerView: 1 },
-              480: { slidesPerView: 2 },
-              768: { slidesPerView: 3 },
-              1280: { slidesPerView: 4 },
+              0: {
+                slidesPerView: 1,
+                grid: { fill: 'row', rows: 2 },
+              },
+              768: {
+                slidesPerView: 2,
+                grid: { fill: 'row', rows: 2 },
+              },
+              992: {
+                slidesPerView: 3,
+                grid: { fill: 'row', rows: 3 },
+              },
+              1280: {
+                slidesPerView: 5,
+                grid: { fill: 'row', rows: 3 },
+              },
             }}
           >
-            {poolOf.map(meta => (
-              <SwiperSlide key={`${meta?.pool_id}`}>
-                <CardBox variant="baseStyle" padding={0}>
-                  <Link to={`/pool/${meta?.pool_id}`}>
+            {poolOf.map(({ endBlock, pool_id, price, poolType }, index) => {
+              const currentMetaPool = MetaPool?.find(
+                meta => meta.pool_id === pool_id
+              );
+
+              const currentMetaNFT = lootTableOf
+                ?.map(meta => {
+                  if (meta.maybeNfT) {
+                    const find = metaNFT?.find(
+                      ({ nft_id, collection_id }) =>
+                        collection_id === meta.maybeNfT?.collection_id &&
+                        nft_id === meta.maybeNfT.nft_id
+                    );
+
+                    if (find) {
+                      return {
+                        pool_id: meta.pool_id,
+                        title: find?.title,
+                        avatar: find?.avatar,
+                      };
+                    }
+                  }
+                })
+                .find(meta => meta?.pool_id === pool_id);
+
+              if (index < 5) {
+                return (
+                  <SwiperSlide key={pool_id}>
                     <Box
-                      padding={2}
-                      borderBottom="0.0625rem solid"
-                      borderColor="shader.a.200"
+                      borderRadius="xl"
+                      border="0.0625rem solid"
+                      borderColor="#52525B"
+                      bg="#3F3F46"
                     >
-                      <RatioPicture src={null} />
+                      <Link to={`/pool/${pool_id}`}>
+                        <RatioPicture
+                          src={
+                            currentMetaNFT?.avatar
+                              ? cloundinary_link(currentMetaNFT.avatar)
+                              : null
+                          }
+                        />
+
+                        <Stack spacing={3} padding={4} pt={6}>
+                          <Center
+                            justifyContent="space-between"
+                            fontWeight="medium"
+                            color="white"
+                          >
+                            <Text>{currentMetaPool?.title || 'unknown'}</Text>
+
+                            <Text fontSize="sm">ID: {pool_id}</Text>
+                          </Center>
+
+                          <Center
+                            justifyContent="space-between"
+                            fontWeight="medium"
+                            color="white"
+                            fontSize="sm"
+                          >
+                            <Box>
+                              <Text fontWeight="normal" color="shader.a.500">
+                                Mint fee:
+                              </Text>
+                              <Text as="span">{formatGAFI(price)} GAFI</Text>
+                            </Box>
+
+                            <Box textAlign="right">
+                              <Text fontWeight="normal" color="shader.a.500">
+                                Type:
+                              </Text>
+                              <Text as="span">{poolType}</Text>
+                            </Box>
+                          </Center>
+
+                          <Box
+                            width="fit-content"
+                            fontSize="xs"
+                            fontWeight="medium"
+                            borderRadius="lg"
+                            bg={convertHex('#ffffff', 0.1)}
+                            color="#CED1D7"
+                            px={2}
+                          >
+                            <DateBlock
+                              endBlock={
+                                endBlock.isSome ? endBlock.value.toNumber() : -1
+                              }
+                              end={endBlock.isSome ? 'Expired' : 'Infinity'}
+                            />
+                          </Box>
+                        </Stack>
+                      </Link>
                     </Box>
-
-                    <Box padding={4}>
-                      <Center justifyContent="space-between">
-                        <Text color="shader.a.900" fontWeight="medium">
-                          {meta?.poolType}
-                        </Text>
-
-                        <Text
-                          fontSize="sm"
-                          color="shader.a.600"
-                          fontWeight="medium"
-                        >
-                          ID:&nbsp;
-                          <Text as="span" color="shader.a.900">
-                            {meta?.pool_id}
-                          </Text>
-                        </Text>
-                      </Center>
-
-                      <Center
-                        justifyContent="space-between"
-                        fontSize="sm"
-                        fontWeight="medium"
-                        color="shader.a.900"
-                      >
-                        <Text display="flex" flexDirection="column">
-                          Price:
-                          <Text as="span" color="shader.a.900">
-                            {formatGAFI(meta?.price)} GAFI
-                          </Text>
-                        </Text>
-
-                        <Text
-                          display="flex"
-                          flexDirection="column"
-                          textAlign="right"
-                        >
-                          End at:
-                          <DateBlock
-                            end={meta?.endBlock.isSome ? 'Expired' : 'Infinity'}
-                            endBlock={
-                              meta?.endBlock.isSome
-                                ? meta.endBlock.value.toNumber()
-                                : -1
-                            }
-                            sx={{ as: 'span', color: 'shader.a.900' }}
-                          />
-                        </Text>
-                      </Center>
-                    </Box>
-                  </Link>
-                </CardBox>
-              </SwiperSlide>
-            ))}
+                  </SwiperSlide>
+                );
+              }
+            })}
           </Swiper>
-        </Box>
-      ) : (
-        <Center>Empty</Center>
-      )}
-    </Stack>
+        ) : isLoading ? null : (
+          <Center color="white">Empty</Center>
+        )}
+      </Box>
+    </Box>
   );
 }

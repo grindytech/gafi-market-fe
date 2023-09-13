@@ -30,14 +30,14 @@ import useBlockTime from 'hooks/useBlockTime';
 import DurationBlock, { ListDurationProps } from 'components/DurationBlock';
 import RatioPicture from 'components/RatioPicture';
 import { BLOCK_TIME } from 'utils/constants';
-import { TypeMetadataOfCollection, TypeMetadataOfItem } from 'types';
+import { TypeMetadataOfCollection } from 'types';
+import { MetaNFTFieldProps } from 'hooks/useMetaNFT';
 
 interface NFTDetailOfferProps {
-  fee: number | undefined;
+  fee: number;
   amount: number | undefined;
-  metaNFT: TypeMetadataOfItem;
+  metaNFT: MetaNFTFieldProps | undefined;
   metaCollection: TypeMetadataOfCollection[] | undefined;
-  refetch: () => void;
 }
 
 export default function NFTDetailOffer({
@@ -45,7 +45,6 @@ export default function NFTDetailOffer({
   amount,
   metaNFT,
   metaCollection,
-  refetch,
 }: NFTDetailOfferProps) {
   const { nft_id, collection_id } = useParams();
 
@@ -53,6 +52,7 @@ export default function NFTDetailOffer({
 
   const { api } = useAppSelector(state => state.substrate);
   const { account } = useAppSelector(state => state.injected.polkadot);
+  const { blockNumber } = useBlockTime('bestNumber');
 
   const {
     register,
@@ -61,18 +61,6 @@ export default function NFTDetailOffer({
     reset,
     formState: { errors },
   } = useForm();
-
-  const { blockNumber } = useBlockTime('bestNumber');
-
-  const { isLoading, mutation } = useSignAndSend({
-    key: ['make_offer', String(nft_id)],
-    address: account?.address as string,
-    onSuccess() {
-      onClose();
-      reset();
-      refetch();
-    },
-  });
 
   const ListDuration: ListDurationProps[] = [
     {
@@ -107,6 +95,20 @@ export default function NFTDetailOffer({
 
   const [duration, setDuration] = React.useState(ListDuration[0]);
 
+  const onReset = () => {
+    reset();
+    onClose();
+    setDuration(ListDuration[0]);
+  };
+
+  const { isLoading, mutation } = useSignAndSend({
+    key: ['make_offer', String(nft_id)],
+    address: account?.address as string,
+    onSuccess() {
+      onReset();
+    },
+  });
+
   return (
     <Button
       variant="cancel"
@@ -119,10 +121,7 @@ export default function NFTDetailOffer({
       {isOpen && (
         <Modal
           isOpen={isOpen}
-          onClose={() => {
-            reset();
-            onClose();
-          }}
+          onClose={onReset}
           closeOnOverlayClick={!isLoading}
         >
           <ModalOverlay />
@@ -152,7 +151,7 @@ export default function NFTDetailOffer({
             onSubmit={handleSubmit(({ price, amount }) => {
               if (api) {
                 mutation(
-                  api.tx.game.setBuy(
+                  api.tx.game.setOrder(
                     { collection: collection_id, item: nft_id, amount },
                     price,
                     blockNumber, // start_block
@@ -187,7 +186,7 @@ export default function NFTDetailOffer({
                   <RatioPicture
                     alt={nft_id}
                     src={
-                      metaNFT?.image ? cloundinary_link(metaNFT?.image) : null
+                      metaNFT?.avatar ? cloundinary_link(metaNFT?.avatar) : null
                     }
                     sx={{ width: 32 }}
                   />
@@ -203,7 +202,7 @@ export default function NFTDetailOffer({
                       fontWeight="semibold"
                       fontSize="xl"
                     >
-                      {metaNFT?.title || '-'}
+                      {metaNFT?.title || 'unknown'}
 
                       {amount ? (
                         <Text
@@ -232,7 +231,7 @@ export default function NFTDetailOffer({
 
                 <Box textAlign="right">
                   <GafiAmount
-                    amount={fee || 0}
+                    amount={fee}
                     sx={{
                       className: 'amount-gafi',
                       sx: {
@@ -245,7 +244,7 @@ export default function NFTDetailOffer({
                     }}
                   />
 
-                  <Text as="span">{formatCurrency(fee || 0, 'usd')}</Text>
+                  <Text as="span">{formatCurrency(fee, 'usd')}</Text>
                 </Box>
               </Flex>
 

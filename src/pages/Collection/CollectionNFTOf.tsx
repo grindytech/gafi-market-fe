@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Center,
+  CircularProgress,
   Flex,
   Grid,
   HStack,
@@ -25,36 +26,18 @@ import useMetaNFT from 'hooks/useMetaNFT';
 import RatioPicture from 'components/RatioPicture';
 import useNFTsItem from 'hooks/useNFTsItem';
 
-interface CollectionNFTOfServiceProps {
-  NFTsItem: {
-    collection_id: number;
-    nft_id: number;
-    owner: string;
-  }[];
-}
-
 export default function CollectionNFTOf() {
   const { collection_id } = useParams();
+  const { isOpen, onToggle } = useDisclosure();
 
-  const { NFTsItem } = useNFTsItem({
+  const { NFTsItem, isLoading } = useNFTsItem({
     key: `collection_detail_of/${collection_id}`,
     filter: 'collection_id',
     arg: [Number(collection_id)],
   });
 
-  return (
-    <>
-      {NFTsItem?.length ? <CollectionNFTOfService NFTsItem={NFTsItem} /> : null}
-    </>
-  );
-}
-
-function CollectionNFTOfService({ NFTsItem }: CollectionNFTOfServiceProps) {
-  const { isOpen, onToggle } = useDisclosure();
-  const { collection_id } = useParams();
-
   const { metaNFT } = useMetaNFT({
-    key: `collection_detail_of/${collection_id}`,
+    key: `collection_detail_of/${collection_id}/isLoading=${isLoading}`,
     filter: 'collection_id',
     arg: NFTsItem?.map(({ collection_id, nft_id }) => ({
       collection_id,
@@ -62,115 +45,111 @@ function CollectionNFTOfService({ NFTsItem }: CollectionNFTOfServiceProps) {
     })),
   });
 
-  return (
-    <>
-      {NFTsItem?.length ? (
-        <Box
-          padding={6}
-          borderTop="0.0625rem solid"
-          borderTopColor="shader.a.200"
+  if (isLoading) {
+    return (
+      <Center>
+        <CircularProgress isIndeterminate color="second.purple" />
+      </Center>
+    );
+  }
+
+  return NFTsItem?.length ? (
+    <Box padding={6} borderTop="0.0625rem solid" borderTopColor="shader.a.200">
+      <HStack gap={4} mb={4} flexWrap="wrap">
+        <Button
+          variant={isOpen ? 'primary' : 'baseStyle'}
+          leftIcon={<Icon as={FilterIcon} />}
+          onClick={onToggle}
         >
-          <HStack gap={4} mb={4} flexWrap="wrap">
-            <Button
-              variant={isOpen ? 'primary' : 'baseStyle'}
-              leftIcon={<Icon as={FilterIcon} />}
-              onClick={onToggle}
-            >
-              Filter
-            </Button>
+          Filter
+        </Button>
 
-            <Select variant="formFilter" width="fit-content">
-              {testOption1.map(item => (
-                <option key={item.value} value={item.value}>
-                  {item.title}
-                </option>
-              ))}
-            </Select>
+        <Select variant="formFilter" width="fit-content">
+          {testOption1.map(item => (
+            <option key={item.value} value={item.value}>
+              {item.title}
+            </option>
+          ))}
+        </Select>
 
-            <Select variant="formFilter" width="fit-content">
-              {testOption2.map(item => (
-                <option key={item.value} value={item.value}>
-                  {item.title}
-                </option>
-              ))}
-            </Select>
+        <Select variant="formFilter" width="fit-content">
+          {testOption2.map(item => (
+            <option key={item.value} value={item.value}>
+              {item.title}
+            </option>
+          ))}
+        </Select>
 
-            <Select variant="formFilter" width="fit-content">
-              {testOptionSort.map(item => (
-                <option key={item.value} value={item.value}>
-                  {item.title}
-                </option>
-              ))}
-            </Select>
-          </HStack>
+        <Select variant="formFilter" width="fit-content">
+          {testOptionSort.map(item => (
+            <option key={item.value} value={item.value}>
+              {item.title}
+            </option>
+          ))}
+        </Select>
+      </HStack>
 
-          <Flex gap={5}>
-            {isOpen ? (
-              <Box flexBasis="25%">
-                <Box position="sticky" top={85} flexBasis="25%">
-                  <MarketPlaceFilter isOpen={isOpen} />
+      <Flex gap={5}>
+        {isOpen ? (
+          <Box flexBasis="25%">
+            <Box position="sticky" top={85} flexBasis="25%">
+              <MarketPlaceFilter isOpen={isOpen} />
+            </Box>
+          </Box>
+        ) : null}
+
+        <Grid
+          flex={1}
+          gap={4}
+          gridTemplateColumns={{
+            sm: 'repeat(2, 1fr)',
+            lg: 'repeat(4, 1fr)',
+          }}
+        >
+          {React.Children.toArray(
+            NFTsItem.map(meta => {
+              const currentMetaNFT = metaNFT?.find(
+                data =>
+                  data?.collection_id === meta.collection_id &&
+                  data.nft_id === meta.nft_id
+              );
+
+              return (
+                <Box
+                  as={Link}
+                  to={`/nft/${meta.nft_id}/${meta.collection_id}`}
+                  border="0.0625rem solid"
+                  borderColor="shader.a.300"
+                  bg="white"
+                  borderRadius="xl"
+                >
+                  <RatioPicture
+                    src={
+                      currentMetaNFT?.avatar
+                        ? cloundinary_link(currentMetaNFT.avatar)
+                        : null
+                    }
+                    alt={meta.nft_id}
+                  />
+
+                  <Center justifyContent="space-between" padding={4}>
+                    <Text color="shader.a.900" fontWeight="medium">
+                      {currentMetaNFT?.title || 'unknown'}
+                    </Text>
+
+                    <Text color="shader.a.500">
+                      ID:&nbsp;
+                      <Text as="span" color="primary.a.500" fontWeight="medium">
+                        {meta.nft_id}
+                      </Text>
+                    </Text>
+                  </Center>
                 </Box>
-              </Box>
-            ) : null}
-
-            <Grid
-              flex={1}
-              gap={4}
-              gridTemplateColumns={{
-                sm: 'repeat(2, 1fr)',
-                lg: 'repeat(4, 1fr)',
-              }}
-            >
-              {React.Children.toArray(
-                NFTsItem.map(meta => {
-                  const currentMetaNFT = metaNFT?.find(
-                    data =>
-                      data?.collection_id === meta.collection_id &&
-                      data.nft_id === meta.nft_id
-                  );
-
-                  return (
-                    <Box
-                      as={Link}
-                      to={`/nft/${meta.nft_id}/${meta.collection_id}`}
-                      border="0.0625rem solid"
-                      borderColor="shader.a.300"
-                      bg="white"
-                      borderRadius="xl"
-                    >
-                      <RatioPicture
-                        src={
-                          currentMetaNFT?.image
-                            ? cloundinary_link(currentMetaNFT.image)
-                            : null
-                        }
-                        alt={meta.nft_id}
-                      />
-
-                      <Center justifyContent="space-between" padding={4}>
-                        <Text color="shader.a.900" fontWeight="medium">
-                          {currentMetaNFT?.title || '-'}
-                        </Text>
-
-                        <Text color="shader.a.500">
-                          ID:&nbsp;
-                          <Text
-                            as="span"
-                            color="primary.a.500"
-                            fontWeight="medium"
-                          >
-                            {meta.nft_id}
-                          </Text>
-                        </Text>
-                      </Center>
-                    </Box>
-                  );
-                })
-              )}
-            </Grid>
-          </Flex>
-        </Box>
-      ) : null}
-    </>
-  );
+              );
+            })
+          )}
+        </Grid>
+      </Flex>
+    </Box>
+  ) : null;
 }

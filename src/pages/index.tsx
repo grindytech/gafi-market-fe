@@ -1,6 +1,7 @@
-import { Divider } from '@chakra-ui/react';
-import AuctionsAndBundles from 'layouts/Home/AuctionsAndBundles';
 import Extraordinary from 'layouts/Home/Extraordinary';
+import TopAuction from 'layouts/Home/TopAuction';
+import TopBundle from 'layouts/Home/TopBundle';
+import TopGames from 'layouts/Home/TopGames';
 import TopPools from 'layouts/Home/TopPools';
 
 import TrendingCollection from 'layouts/Home/TrendingCollection';
@@ -12,11 +13,11 @@ export default function Home() {
 
       <TrendingCollection />
 
-      <Divider my={6} borderColor="shader.a.300" opacity={1} />
+      <TopGames />
 
-      <AuctionsAndBundles />
+      <TopAuction />
 
-      <Divider my={6} bg="shader.a.300" opacity={1} />
+      <TopBundle />
 
       <TopPools />
     </>

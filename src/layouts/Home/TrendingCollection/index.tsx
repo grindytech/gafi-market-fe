@@ -1,8 +1,4 @@
-import { Box, Center, Flex, HStack, Icon, Stack, Text } from '@chakra-ui/react';
-
-import { Grid, Mousewheel } from 'swiper';
-
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { Box, Center, Flex, HStack, Icon, Text } from '@chakra-ui/react';
 
 import CollectionIcon from 'public/assets/line/collection-02.svg';
 
@@ -11,10 +7,12 @@ import { Link } from 'react-router-dom';
 import useMetaCollection from 'hooks/useMetaCollection';
 import RatioPicture from 'components/RatioPicture';
 import TrendingCollectionLoading from './TrendingCollectionLoading';
-import 'swiper/css';
-import 'swiper/bundle';
-import 'swiper/css/grid';
+
 import useNFTsCollection from 'hooks/useNFTsCollection';
+
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import { Grid } from 'swiper';
 
 export default function TrendingCollection() {
   const { NFTsCollection, isLoading } = useNFTsCollection({
@@ -28,7 +26,7 @@ export default function TrendingCollection() {
   });
 
   return (
-    <Stack spacing={6} mt={12}>
+    <Box mt={6}>
       <Flex gap={3} alignItems="center">
         <Icon
           as={CollectionIcon}
@@ -40,94 +38,119 @@ export default function TrendingCollection() {
         />
 
         <Text color="shader.a.900" fontWeight="semibold" fontSize="xl">
-          Trending Collections
+          Trending collections
         </Text>
       </Flex>
 
-      <Box>
+      <Box mt={4}>
         {isLoading && <TrendingCollectionLoading />}
 
         {NFTsCollection?.length ? (
-          <Swiper
-            spaceBetween={20}
-            grid={{ rows: 3, fill: 'row' }}
-            modules={[Mousewheel, Grid]}
-            mousewheel={{ forceToAxis: true }}
-            breakpoints={{
-              0: { slidesPerView: 1, grid: { rows: 2 } },
-              480: { slidesPerView: 2, grid: { rows: 2 } },
-              768: { slidesPerView: 3 },
+          <Box
+            sx={{
+              '.swiper-wrapper': { rowGap: 2 },
+              '.swiper-slide': { mt: '0!' },
             }}
           >
-            {NFTsCollection.map(({ collection_id }) => {
-              const currentMetaCollection = MetaCollection?.find(
-                meta => meta?.collection_id === collection_id
-              );
+            <Swiper
+              spaceBetween={24}
+              modules={[Grid]}
+              breakpoints={{
+                0: {
+                  slidesPerView: 1,
+                  grid: { fill: 'row', rows: 2 },
+                },
+                768: {
+                  slidesPerView: 2,
+                  grid: { fill: 'row', rows: 2 },
+                },
+                992: {
+                  slidesPerView: 3,
+                  grid: { fill: 'row', rows: 3 },
+                },
+                1280: {
+                  slidesPerView: 4,
+                  grid: { fill: 'row', rows: 3 },
+                },
+              }}
+            >
+              {NFTsCollection.map(({ collection_id }, index) => {
+                const currentMetaCollection = MetaCollection?.find(
+                  meta => meta?.collection_id === collection_id
+                );
 
-              return (
-                <SwiperSlide key={collection_id}>
-                  <HStack
-                    spacing={4}
-                    as={Link}
-                    to={`/collection/${collection_id}`}
-                    flexWrap={{
-                      base: 'wrap',
-                      xl: 'unset',
-                    }}
-                  >
-                    <RatioPicture
-                      alt={`trendingCollection-${collection_id}`}
-                      src={
-                        currentMetaCollection?.image
-                          ? cloundinary_link(currentMetaCollection.image)
-                          : null
-                      }
-                      sx={{
-                        width: { base: 'full', xl: 14 },
-                        height: { base: 'full', xl: 14 },
-                      }}
-                    />
-
-                    <Box width={{ base: 'full', xl: 'auto' }}>
-                      <Text
-                        fontSize="lg"
-                        fontWeight="medium"
-                        color="shader.a.900"
+                if (index <= 11) {
+                  return (
+                    <SwiperSlide key={collection_id}>
+                      <HStack
+                        as={Link}
+                        spacing={4}
+                        to={`/collection/${collection_id}`}
+                        border="0.0625rem solid transparent"
+                        transitionDuration="ultra-slow"
+                        borderRadius="xl"
+                        padding={4}
+                        _hover={{
+                          borderColor: 'shader.a.400',
+                          bg: 'shader.a.200',
+                        }}
                       >
-                        {currentMetaCollection?.title || '-'} ID&nbsp;
-                        {collection_id}
-                      </Text>
+                        <Box>
+                          <RatioPicture
+                            alt={`trendingCollection-${collection_id}`}
+                            src={
+                              currentMetaCollection?.avatar
+                                ? cloundinary_link(currentMetaCollection.avatar)
+                                : null
+                            }
+                            sx={{ width: 16, height: 16 }}
+                          />
+                        </Box>
 
-                      <Center
-                        gap={3}
-                        justifyContent="space-between"
-                        fontSize="sm"
-                        color="shader.a.600"
-                      >
-                        <Flex flexDirection="column">
-                          <Text>Floor Price:&nbsp;</Text>
-                          <Text color="shader.a.900" fontWeight="medium">
-                            0.00 GAFI
+                        <Box>
+                          <Text
+                            fontSize="lg"
+                            fontWeight="medium"
+                            color="shader.a.900"
+                            noOfLines={1}
+                          >
+                            {currentMetaCollection?.title || 'unknown'}
                           </Text>
-                        </Flex>
 
-                        <Flex flexDirection="column">
-                          <Text>Vol:&nbsp;</Text>
-                          <Text color="shader.a.900" fontWeight="medium">
-                            0.00 GAFI
-                          </Text>
-                        </Flex>
-                      </Center>
-                    </Box>
-                  </HStack>
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
-        ) : (
+                          <Flex
+                            mt={0.5}
+                            gap={{ base: 2, md: 6 }}
+                            fontSize="sm"
+                            color="shader.a.600"
+                          >
+                            <Box>
+                              <Text>Floor Price:&nbsp;</Text>
+
+                              <Text color="shader.a.900" fontWeight="medium">
+                                0.00 GAFI
+                              </Text>
+                            </Box>
+
+                            <Box>
+                              <Text>Vol:&nbsp;</Text>
+
+                              <Text color="shader.a.900" fontWeight="medium">
+                                0.00 GAFI
+                              </Text>
+                            </Box>
+                          </Flex>
+                        </Box>
+                      </HStack>
+                    </SwiperSlide>
+                  );
+                }
+              })}
+            </Swiper>
+          </Box>
+        ) : isLoading ? null : (
           <Center>Empty</Center>
         )}
       </Box>
-    </Stack>
+    </Box>
   );
 }

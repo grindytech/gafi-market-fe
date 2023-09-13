@@ -10,6 +10,12 @@ export interface useHighestBidOfProps {
   key: string | string[] | number | number[];
 }
 
+export interface HighestBidOfFieldProps {
+  trade_id: number;
+  owner: string;
+  bidPrice: u128;
+}
+
 export default function useHighestBidOf({
   filter,
   arg,
@@ -34,10 +40,10 @@ export default function useHighestBidOf({
               return {
                 trade_id: trade_id.args[0].toNumber(),
                 owner: meta.value[0].toString(),
-                bidPrice: meta.value[1].toNumber(),
+                bidPrice: meta.value[1],
               };
             }
-          );
+          ) as HighestBidOfFieldProps[];
         }
 
         if (filter === 'trade_id' && arg) {
@@ -52,9 +58,11 @@ export default function useHighestBidOf({
               return {
                 trade_id,
                 owner: service.value[0].toString(),
-                bidPrice: service.value[1].toNumber(),
+                bidPrice: service.value[1],
               };
             })
+          ).then(data =>
+            data.filter((meta): meta is HighestBidOfFieldProps => !!meta)
           );
         }
       }
