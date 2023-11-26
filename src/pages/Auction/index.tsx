@@ -47,7 +47,7 @@ export default function Auction() {
   });
 
   const { metaNFT } = useMetaNFT({
-    key: `auction_detail/${id}`,
+    key: `auction_detail/${id}/isLoading=${bundleLoading}`,
     filter: 'collection_id',
     arg: bundleOf?.map(({ collection_id, nft_id }) => ({
       collection_id,

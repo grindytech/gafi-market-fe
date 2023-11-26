@@ -13,6 +13,10 @@ import { Grid } from 'swiper';
 import { useQuery } from '@tanstack/react-query';
 import axiosSwagger from 'axios/axios.swagger';
 
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import { Grid } from 'swiper';
+
 export default function TrendingCollection() {
   const { data, isLoading } = useQuery({
     queryKey: ['home_trendingCollection'],
