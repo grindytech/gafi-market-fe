@@ -29,7 +29,13 @@ export default function ConnectWalletProfile({
           {name || 'unknown'}
         </Text>
 
-        <Text color="shader.a.500" fontSize="sm">
+        <Text
+          gap={1}
+          display="flex"
+          alignItems="center"
+          color="shader.a.500"
+          fontSize="sm"
+        >
           {shorten(address, 6)}
 
           <ButtonCopy

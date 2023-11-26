@@ -1,4 +1,4 @@
-import { Box, Center, CircularProgress } from '@chakra-ui/react';
+import { Box, Center, CircularProgress, Stack } from '@chakra-ui/react';
 import CardBox from 'components/CardBox';
 import { useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -10,41 +10,26 @@ import { Swiper as SwiperType } from 'swiper/types';
 import BundleBid from './BundleBid';
 import useTradeConfigOf from 'hooks/useTradeConfigOf';
 import useBundleOf from 'hooks/useBundleOf';
-import { Option, Vec, u128, u32 } from '@polkadot/types';
-import {
-  GafiSupportGameTypesPackage,
-  GafiSupportGameTypesTradeType,
-} from '@polkadot/types/lookup';
-import DefaultDetail from 'layouts/DefaultLayout/DefaultDetail';
-import BundleLayoutModelSwiper from 'layouts/BundleLayout/BundleLayoutModelSwiper';
-import BundleLayoutSocial from 'layouts/BundleLayout/BundleLayoutSocial';
-import BundleLayoutMenu from 'layouts/BundleLayout/BundleLayoutMenu';
-import BundleLayoutCardHeading from 'layouts/BundleLayout/BundleLayoutCardHeading';
-import BundleLayoutHeading from 'layouts/BundleLayout/BundleLayoutHeading';
-import BundleLayoutOwner from 'layouts/BundleLayout/BundleLayoutOwner';
-import BundleLayoutExpires from 'layouts/BundleLayout/BundleLayoutExpires';
-import BundleLayoutPrice from 'layouts/BundleLayout/BundleLayoutPrice';
-import BundleLayoutItems from 'layouts/BundleLayout/BundleLayoutItems';
 
-interface BundleServiceProps {
-  bundleOf: {
-    trade_id: number;
-    collection_id: number;
-    nft_id: number;
-    amount: number;
-  }[];
-  tradeConfigOf: {
-    trade_id: number;
-    trade: GafiSupportGameTypesTradeType;
-    owner: string;
-    maybePrice: Option<u128>;
-    maybeRequired: Option<Vec<GafiSupportGameTypesPackage>>;
-    endBlock: Option<u32>;
-  }[];
-}
+import DefaultDetail from 'layouts/DefaultLayout/DefaultDetail';
+
+import SwiperLayoutThumb from 'layouts/SwiperLayout/SwiperLayoutThumb';
+import DetailSocial from 'layouts/Detail/DetailSocial';
+import DetailMenu from 'layouts/Detail/DetailMenu';
+
+import DetailCollectionName from 'layouts/Detail/DetailCollectionName';
+import DetailOwnerBy from 'layouts/Detail/DetailOwnerBy';
+import DetailExpires from 'layouts/Detail/DetailExpires';
+import DetailPrice from 'layouts/Detail/DetailPrice';
+import SwiperLayoutItems from 'layouts/SwiperLayout/SwiperLayoutItems';
 
 export default function Bundle() {
   const { id } = useParams();
+  const navigation = useNavigate();
+
+  const swiperRef = useRef<SwiperType>();
+
+  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 
   const { tradeConfigOf, isLoading } = useTradeConfigOf({
     key: `bundle_detail/${id}`,
@@ -52,46 +37,21 @@ export default function Bundle() {
     arg: [Number(id)],
   });
 
-  const { bundleOf } = useBundleOf({
+  const { bundleOf, isLoading: isLoadingBundle } = useBundleOf({
     key: `bundle_detail/${id}`,
     filter: 'trade_id',
     arg: [Number(id)],
   });
 
-  if (isLoading)
-    return (
-      <Center height="100vh">
-        <CircularProgress isIndeterminate color="second.purple" />
-      </Center>
-    );
-
-  if (!tradeConfigOf?.length) return <Center height="100vh">Not Found</Center>;
-
-  return (
-    <Box>
-      {tradeConfigOf?.length && bundleOf?.length ? (
-        <BundleService bundleOf={bundleOf} tradeConfigOf={tradeConfigOf} />
-      ) : null}
-    </Box>
-  );
-}
-
-function BundleService({ bundleOf, tradeConfigOf }: BundleServiceProps) {
-  const navigation = useNavigate();
-  const { id } = useParams();
-
   const { metaNFT } = useMetaNFT({
     key: `bundle_detail/${id}`,
     filter: 'collection_id',
-    arg: bundleOf.map(({ collection_id, nft_id }) => ({
+    arg: bundleOf?.map(({ collection_id, nft_id }) => ({
       collection_id,
       nft_id,
     })),
+    async: isLoadingBundle,
   });
-
-  const swiperRef = useRef<SwiperType>();
-
-  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 
   const ListMenu = [
     {
@@ -107,69 +67,77 @@ function BundleService({ bundleOf, tradeConfigOf }: BundleServiceProps) {
     },
   ];
 
+  if (isLoading)
+    return (
+      <Center height="100vh">
+        <CircularProgress isIndeterminate color="second.purple" />
+      </Center>
+    );
+
+  if (!tradeConfigOf?.length) return <Center height="100vh">Not Found</Center>;
+
   return (
-    <>
-      <DefaultDetail>
-        <BundleLayoutModelSwiper
-          bundleOf={bundleOf.map(({ collection_id, nft_id }) => ({
-            collection_id,
-            nft_id,
-          }))}
-          metaNFT={metaNFT}
-          swiperRef={swiperRef}
-          thumbs={thumbsSwiper}
-        >
-          <BundleLayoutSocial />
+    <Box>
+      {tradeConfigOf?.length && bundleOf?.length ? (
+        <DefaultDetail>
+          <SwiperLayoutThumb
+            bundleOf={bundleOf.map(({ collection_id, nft_id }) => ({
+              collection_id,
+              nft_id,
+            }))}
+            metaNFT={metaNFT}
+            swiperRef={swiperRef}
+            thumbs={thumbsSwiper}
+          >
+            <DetailSocial />
 
-          <BundleLayoutMenu menu={ListMenu} />
-        </BundleLayoutModelSwiper>
+            <DetailMenu menu={ListMenu} />
+          </SwiperLayoutThumb>
 
-        <Box>
-          <CardBox variant="baseStyle">
-            <BundleLayoutCardHeading>
-              <BundleLayoutHeading
-                heading="Bundle detail"
-                sx={{
-                  as: 'h3',
-                }}
-              />
+          <Box>
+            <CardBox variant="baseStyle">
+              <Stack>
+                <DetailCollectionName name="Bundle detail" />
 
-              <BundleLayoutOwner owner={tradeConfigOf[0].owner} />
-            </BundleLayoutCardHeading>
+                <DetailOwnerBy owner={tradeConfigOf[0].owner} />
+              </Stack>
 
-            <CardBox variant="baseStyle" padding={0}>
-              <BundleLayoutExpires
-                heading="Bundle"
-                endBlock={tradeConfigOf[0].endBlock.value.toNumber()}
-              />
+              <CardBox variant="baseStyle" padding={0} mt={6}>
+                <DetailExpires
+                  heading="Bundle"
+                  endBlock={tradeConfigOf[0].endBlock.value.toNumber()}
+                />
 
-              <BundleLayoutPrice
-                amount={tradeConfigOf[0].maybePrice.value.toHuman()}
-              />
+                <DetailPrice
+                  amount={tradeConfigOf[0].maybePrice.value.toHuman()}
+                />
 
-              <Box padding={6} pt={0}>
-                <BundleBid
-                  maybePrice={tradeConfigOf[0].maybePrice.value.toNumber()}
+                <Box padding={6} pt={0}>
+                  <BundleBid
+                    maybePrice={tradeConfigOf[0].maybePrice.value.toNumber()}
+                  />
+                </Box>
+              </CardBox>
+            </CardBox>
+
+            <CardBox variant="baseStyle" mt={4}>
+              <Box>
+                <SwiperLayoutItems
+                  queryKey={`bundle_detail/${id}`}
+                  setThumbsSwiper={setThumbsSwiper}
+                  bundleOf={bundleOf.map(
+                    ({ collection_id, nft_id, amount }) => ({
+                      collection_id,
+                      nft_id,
+                      amount,
+                    })
+                  )}
                 />
               </Box>
             </CardBox>
-          </CardBox>
-
-          <CardBox variant="baseStyle" mt={4}>
-            <Box>
-              <BundleLayoutItems
-                queryKey={`bundle_detail/${id}`}
-                setThumbsSwiper={setThumbsSwiper}
-                bundleOf={bundleOf.map(({ collection_id, nft_id, amount }) => ({
-                  collection_id,
-                  nft_id,
-                  amount,
-                }))}
-              />
-            </Box>
-          </CardBox>
-        </Box>
-      </DefaultDetail>
-    </>
+          </Box>
+        </DefaultDetail>
+      ) : null}
+    </Box>
   );
 }

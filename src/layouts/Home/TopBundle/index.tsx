@@ -9,35 +9,33 @@ import {
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import useBundleOf from 'hooks/useBundleOf';
 import RatioPicture from 'components/RatioPicture';
-import useMetaNFT from 'hooks/useMetaNFT';
-import { cloundinary_link } from 'axios/cloudinary_axios';
-import React from 'react';
-import useTradeConfigOf from 'hooks/useTradeConfigOf';
+
 import { Link } from 'react-router-dom';
 import TopBundleSkeleton from './TopBundleSkeleton';
 import NFTsIcon from 'public/assets/line/nfts.svg';
+import { useQuery } from '@tanstack/react-query';
+import axiosSwagger from 'axios/axios.swagger';
+import useMetaNFT from 'hooks/useMetaNFT';
+
+import { formatGAFI } from 'utils/utils';
 
 export default () => {
-  const { tradeConfigOf, isLoading } = useTradeConfigOf({
-    key: `home_TopBundle`,
-    filter: 'entries',
-  });
-
-  const { bundleOf, isLoading: bundleLoading } = useBundleOf({
-    key: `home_TopBundle/isLoading=${isLoading}`,
-    filter: 'trade_id',
-    arg: tradeConfigOf?.map(({ trade_id }) => trade_id),
+  const { data, isLoading } = useQuery({
+    queryKey: ['home_topBundle'],
+    queryFn: async () => {
+      return axiosSwagger.tradeSearch();
+    },
   });
 
   const { metaNFT } = useMetaNFT({
-    key: `home_TopBundle/isLoading=[${bundleLoading}, ${isLoading}]`,
+    key: 'home_topBundle',
     filter: 'collection_id',
-    arg: bundleOf?.map(({ collection_id, nft_id }) => ({
-      collection_id,
-      nft_id,
+    arg: data?.data?.map(({ nft }) => ({
+      collection_id: nft?.collection,
+      nft_id: nft?.item,
     })),
+    async: isLoading,
   });
 
   return (
@@ -53,7 +51,7 @@ export default () => {
       <Box mt={4}>
         {isLoading && <TopBundleSkeleton />}
 
-        {bundleOf?.length && tradeConfigOf?.length ? (
+        {data?.data?.length ? (
           <GridChakra
             gridTemplateColumns={{
               sm: 'repeat(2, 1fr)',
@@ -73,66 +71,39 @@ export default () => {
               },
             }}
           >
-            {tradeConfigOf.map(({ maybePrice, trade_id }) => {
+            {data.data.map((meta, index) => {
               return (
-                <Swiper loop={true} spaceBetween={32} key={trade_id}>
-                  {React.Children.toArray(
-                    bundleOf.map(
-                      ({ collection_id, nft_id, trade_id: tradeBundle }) => {
-                        const currentMetaNFT = metaNFT?.find(
-                          meta =>
-                            meta.collection_id === collection_id &&
-                            meta.nft_id === nft_id
-                        );
+                <Swiper loop={true} spaceBetween={32} key={meta.trade_id}>
+                  <SwiperSlide>
+                    <Link to={`/bundle/${meta.trade_id}`}>
+                      <RatioPicture src={metaNFT?.[index]?.image || null} />
 
-                        if (tradeBundle === trade_id) {
-                          return (
-                            <SwiperSlide>
-                              <Link to={`/bundle/${trade_id}`}>
-                                <RatioPicture
-                                  src={
-                                    currentMetaNFT?.avatar
-                                      ? cloundinary_link(currentMetaNFT.avatar)
-                                      : null
-                                  }
-                                />
+                      <Box bg="shader.a.100" padding={4} pt={6}>
+                        <Center
+                          justifyContent="space-between"
+                          fontWeight="medium"
+                          color="shader.a.900"
+                        >
+                          <Text>{metaNFT?.[index]?.name}</Text>
 
-                                <Box bg="shader.a.100" padding={4} pt={6}>
-                                  <Center
-                                    justifyContent="space-between"
-                                    fontWeight="medium"
-                                    color="shader.a.900"
-                                  >
-                                    <Text>
-                                      {currentMetaNFT?.title || 'unknown'}
-                                    </Text>
+                          <Text fontSize="sm">ID: {meta.trade_id}</Text>
+                        </Center>
 
-                                    <Text fontSize="sm">ID: {nft_id}</Text>
-                                  </Center>
+                        <Center
+                          mt={1}
+                          justifyContent="space-between"
+                          fontSize="sm"
+                        >
+                          <Text color="shader.a.900">Price:</Text>
 
-                                  <Center
-                                    mt={1}
-                                    justifyContent="space-between"
-                                    fontSize="sm"
-                                  >
-                                    <Text color="shader.a.900">Price:</Text>
-
-                                    <Text
-                                      color="shader.a.500"
-                                      fontWeight="medium"
-                                    >
-                                      {maybePrice.value.toHuman() || 0}
-                                      &nbsp; GAFI
-                                    </Text>
-                                  </Center>
-                                </Box>
-                              </Link>
-                            </SwiperSlide>
-                          );
-                        }
-                      }
-                    )
-                  )}
+                          <Text color="shader.a.500" fontWeight="medium">
+                            {formatGAFI(meta.highest_bid || meta.price)}
+                            &nbsp; GAFI
+                          </Text>
+                        </Center>
+                      </Box>
+                    </Link>
+                  </SwiperSlide>
                 </Swiper>
               );
             })}

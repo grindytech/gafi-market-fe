@@ -3,6 +3,7 @@ import {
   Center,
   CircularProgress,
   Flex,
+  Stack,
   Tab,
   TabList,
   TabPanel,
@@ -34,15 +35,17 @@ import useBundleOf from 'hooks/useBundleOf';
 import DefaultDetail from 'layouts/DefaultLayout/DefaultDetail';
 
 import NFTDetailListNFT from './NFTDetailListNFT';
-import BundleLayoutModel from 'layouts/BundleLayout/BundleLayoutModel';
-import BundleLayoutSocial from 'layouts/BundleLayout/BundleLayoutSocial';
-import BundleLayoutCardHeading from 'layouts/BundleLayout/BundleLayoutCardHeading';
-import BundleLayoutHeading from 'layouts/BundleLayout/BundleLayoutHeading';
-import BundleLayoutAmount from 'layouts/BundleLayout/BundleLayoutAmount';
-import BundleLayoutOwner from 'layouts/BundleLayout/BundleLayoutOwner';
-import BundleLayoutNotSale from 'layouts/BundleLayout/BundleLayoutNotSale';
-import BundleLayoutExpires from 'layouts/BundleLayout/BundleLayoutExpires';
-import BundleLayoutPrice from 'layouts/BundleLayout/BundleLayoutPrice';
+
+import DetailNotSale from 'layouts/Detail/DetailNotSale';
+import DetailPrice from 'layouts/Detail/DetailPrice';
+import DetailExpires from 'layouts/Detail/DetailExpires';
+import DetailNFTName from 'layouts/Detail/DetailNFTName';
+import DetailCollectionName from 'layouts/Detail/DetailCollectionName';
+import DetailOwnerBy from 'layouts/Detail/DetailOwnerBy';
+import DetailAmount from 'layouts/Detail/DetailAmount';
+import DetailSocial from 'layouts/Detail/DetailSocial';
+import DetailPreviewNFT from 'layouts/Detail/DetailPreviewNFT';
+import RatioPicture from 'components/RatioPicture';
 
 export default () => {
   const { account } = useAppSelector(state => state.injected.polkadot);
@@ -113,6 +116,12 @@ export default () => {
     tradeRefetch();
   };
 
+  const currentMetaNFT = metaNFT?.find(
+    data =>
+      data?.collection_id === Number(collection_id) &&
+      data?.nft_id === bundleOf?.[0].nft_id
+  );
+
   if (isLoading)
     return (
       <Center height="100vh">
@@ -123,39 +132,32 @@ export default () => {
   return NFTsItem?.length ? (
     <>
       <DefaultDetail>
-        <BundleLayoutModel
-          bundleOf={{
-            collection_id: Number(collection_id),
-            nft_id: Number(nft_id),
-          }}
-          metaNFT={metaNFT}
-        >
-          <BundleLayoutSocial />
-        </BundleLayoutModel>
+        <DetailPreviewNFT>
+          <RatioPicture
+            src={currentMetaNFT?.image || null}
+            sx={{ ratio: { base: 16 / 9, lg: 1 / 1 } }}
+          />
+
+          <DetailSocial />
+        </DetailPreviewNFT>
 
         <Box>
           <CardBox variant="baseStyle">
-            <BundleLayoutCardHeading>
-              <BundleLayoutHeading
-                heading={MetaCollection?.[0]?.title || 'unknown'}
-                sx={{ fontSize: 'lg' }}
-              />
+            <Stack>
+              <Stack spacing={1}>
+                <DetailNFTName name={MetaCollection?.[0]?.name as string} />
 
-              <BundleLayoutHeading
-                heading={metaNFT?.[0]?.title || 'unknown'}
-                sx={{ as: 'h3', fontWeight: 'bold' }}
-              />
+                <DetailCollectionName name={metaNFT?.[0]?.name as string} />
+              </Stack>
 
-              <BundleLayoutOwner owner={NFTsItem[0].owner} />
+              <DetailOwnerBy owner={NFTsItem[0].owner} />
 
-              {listing?.amount && (
-                <BundleLayoutAmount amount={listing.amount} />
-              )}
-            </BundleLayoutCardHeading>
+              {listing?.amount && <DetailAmount amount={listing.amount} />}
+            </Stack>
 
-            <CardBox variant="baseStyle" padding={0}>
+            <CardBox variant="baseStyle" padding={0} mt={6}>
               {listing ? (
-                <BundleLayoutExpires
+                <DetailExpires
                   heading="Sell"
                   endBlock={
                     listing?.endBlock.isSome
@@ -166,11 +168,9 @@ export default () => {
               ) : null}
 
               {listing?.maybePrice.isSome ? (
-                <BundleLayoutPrice
-                  amount={listing?.maybePrice.value.toHuman()}
-                />
+                <DetailPrice amount={listing?.maybePrice.value.toHuman()} />
               ) : (
-                <BundleLayoutNotSale />
+                <DetailNotSale />
               )}
 
               <Flex gap={2} padding={6} pt={0}>
@@ -192,7 +192,7 @@ export default () => {
                 {listing && NFTsItem[0].owner !== account?.address ? (
                   <NFTDetailBuy
                     trade_id={listing.trade_id}
-                    fee={listing.maybePrice.value.toNumber()}
+                    fee={listing.maybePrice.value.toString()}
                     amount={listing.amount}
                     refetch={onSuccess}
                   />

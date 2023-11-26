@@ -6,9 +6,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper/types';
 import { Thumbs } from 'swiper';
 import RatioPicture from 'components/RatioPicture';
-import { cloundinary_link } from 'axios/cloudinary_axios';
 
-interface BundleLayoutItemsProps {
+interface SwiperLayoutItems {
   queryKey: string;
   setThumbsSwiper: React.Dispatch<SwiperType>;
   bundleOf: {
@@ -18,11 +17,7 @@ interface BundleLayoutItemsProps {
   }[];
 }
 
-export default ({
-  queryKey,
-  setThumbsSwiper,
-  bundleOf,
-}: BundleLayoutItemsProps) => {
+export default ({ queryKey, setThumbsSwiper, bundleOf }: SwiperLayoutItems) => {
   const { MetaCollection } = useMetaCollection({
     key: queryKey,
     filter: 'collection_id',
@@ -72,22 +67,19 @@ export default ({
               return (
                 <SwiperSlide>
                   <Center
-                    mt={2}
                     justifyContent="space-between"
                     wordBreak="break-word"
                     borderRadius="xl"
                     gap={4}
                     padding={4}
+                    mt={2}
                     border="0.0625rem solid"
                     borderColor="shader.a.300"
+                    cursor="pointer"
                   >
                     <Flex gap={4}>
                       <RatioPicture
-                        src={
-                          currentMetaNFT?.avatar
-                            ? cloundinary_link(currentMetaNFT.avatar)
-                            : null
-                        }
+                        src={currentMetaNFT?.image || null}
                         sx={{ width: 12 }}
                       />
 
@@ -98,11 +90,11 @@ export default ({
                           color="shader.a.500"
                           fontSize="sm"
                         >
-                          {currentMetaCollection?.title || '-'}
+                          {currentMetaCollection?.name}
                         </Text>
 
-                        <Text fontWeight="medium">
-                          {currentMetaNFT?.title || '-'}&nbsp;
+                        <Text fontWeight="medium" mt={1.5}>
+                          {currentMetaNFT?.name}&nbsp;
                           <Text
                             as="span"
                             fontSize="sm"

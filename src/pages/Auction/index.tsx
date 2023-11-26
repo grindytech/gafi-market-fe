@@ -1,4 +1,4 @@
-import { Box, Center, CircularProgress, Flex } from '@chakra-ui/react';
+import { Box, Center, CircularProgress, Flex, Stack } from '@chakra-ui/react';
 
 import CardBox from 'components/CardBox';
 import { useRef, useState } from 'react';
@@ -14,15 +14,14 @@ import AuctionClaim from './AuctionClaim';
 import useBundleOf from 'hooks/useBundleOf';
 import useAuctionConfigOf from 'hooks/useAuctionConfigOf';
 import DefaultDetail from 'layouts/DefaultLayout/DefaultDetail';
-import BundleLayoutModelSwiper from 'layouts/BundleLayout/BundleLayoutModelSwiper';
-import BundleLayoutMenu from 'layouts/BundleLayout/BundleLayoutMenu';
-import BundleLayoutSocial from 'layouts/BundleLayout/BundleLayoutSocial';
-import BundleLayoutCardHeading from 'layouts/BundleLayout/BundleLayoutCardHeading';
-import BundleLayoutHeading from 'layouts/BundleLayout/BundleLayoutHeading';
-import BundleLayoutOwner from 'layouts/BundleLayout/BundleLayoutOwner';
-import BundleLayoutExpires from 'layouts/BundleLayout/BundleLayoutExpires';
-import BundleLayoutPrice from 'layouts/BundleLayout/BundleLayoutPrice';
-import BundleLayoutItems from 'layouts/BundleLayout/BundleLayoutItems';
+import SwiperLayoutThumb from 'layouts/SwiperLayout/SwiperLayoutThumb';
+import DetailSocial from 'layouts/Detail/DetailSocial';
+import DetailMenu from 'layouts/Detail/DetailMenu';
+import DetailCollectionName from 'layouts/Detail/DetailCollectionName';
+import DetailOwnerBy from 'layouts/Detail/DetailOwnerBy';
+import DetailExpires from 'layouts/Detail/DetailExpires';
+import DetailPrice from 'layouts/Detail/DetailPrice';
+import SwiperLayoutItems from 'layouts/SwiperLayout/SwiperLayoutItems';
 
 export default function Auction() {
   const { id } = useParams();
@@ -41,9 +40,10 @@ export default function Auction() {
   });
 
   const { highestBidOf, refetch } = useHighestBidOf({
-    key: `auction_detail/${id}/isLoading=${isLoading}`,
+    key: `auction_detail/${id}`,
     filter: 'trade_id',
     arg: auctionConfigOf?.map(meta => meta.trade_id),
+    async: isLoading,
   });
 
   const { metaNFT } = useMetaNFT({
@@ -53,6 +53,7 @@ export default function Auction() {
       collection_id,
       nft_id,
     })),
+    async: bundleLoading,
   });
 
   const swiperRef = useRef<SwiperType>();
@@ -89,7 +90,7 @@ export default function Auction() {
     <>
       {bundleOf?.length && auctionConfigOf?.length ? (
         <DefaultDetail>
-          <BundleLayoutModelSwiper
+          <SwiperLayoutThumb
             bundleOf={bundleOf.map(({ collection_id, nft_id }) => ({
               collection_id,
               nft_id,
@@ -98,29 +99,26 @@ export default function Auction() {
             swiperRef={swiperRef}
             thumbs={thumbsSwiper}
           >
-            <BundleLayoutSocial />
+            <DetailSocial />
 
-            <BundleLayoutMenu menu={ListMenu} />
-          </BundleLayoutModelSwiper>
+            <DetailMenu menu={ListMenu} />
+          </SwiperLayoutThumb>
 
           <Box>
             <CardBox variant="baseStyle">
-              <BundleLayoutCardHeading>
-                <BundleLayoutHeading
-                  heading="Auction detail"
-                  sx={{ as: 'h3' }}
-                />
+              <Stack spacing={1}>
+                <DetailCollectionName name="Auction detail" />
 
-                <BundleLayoutOwner owner={auctionConfigOf[0].owner} />
-              </BundleLayoutCardHeading>
+                <DetailOwnerBy owner={auctionConfigOf[0].owner} />
+              </Stack>
 
-              <CardBox variant="baseStyle" padding={0}>
-                <BundleLayoutExpires
+              <CardBox variant="baseStyle" padding={0} mt={6}>
+                <DetailExpires
                   heading="Auction"
                   endBlock={auctionConfigOf[0].duration.toNumber()}
                 />
 
-                <BundleLayoutPrice
+                <DetailPrice
                   amount={
                     highestBidOf?.[0]?.bidPrice.toHuman() ||
                     auctionConfigOf[0].maybePrice.value.toHuman()
@@ -135,7 +133,7 @@ export default function Auction() {
               </CardBox>
 
               <CardBox variant="baseStyle" mt={4}>
-                <BundleLayoutItems
+                <SwiperLayoutItems
                   queryKey={`auction_detail/${id}`}
                   setThumbsSwiper={setThumbsSwiper}
                   bundleOf={bundleOf.map(

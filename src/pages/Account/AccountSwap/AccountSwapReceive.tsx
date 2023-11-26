@@ -1,7 +1,6 @@
 import { Box, Icon, IconButton, List, ListItem, Text } from '@chakra-ui/react';
 import RatioPicture from 'components/RatioPicture';
 
-import { cloundinary_link } from 'axios/cloudinary_axios';
 import { Control, UseFormSetValue } from 'react-hook-form';
 
 import CloseIcon from 'public/assets/line/close.svg';
@@ -42,7 +41,7 @@ export default ({
               _notFirst={{ mt: 2 }}
             >
               <RatioPicture
-                src={meta?.image ? cloundinary_link(meta.image) : null}
+                src={meta?.image || null}
                 sx={{
                   width: 12,
                   height: 12,
@@ -59,7 +58,7 @@ export default ({
                 }}
               >
                 <Text fontSize="sm" color="shader.a.1000" fontWeight="medium">
-                  {meta?.title || '-'}&nbsp;
+                  {meta?.name}&nbsp;
                   <Text as="span" color="#71717A">
                     ID:{meta.nft_id}
                   </Text>

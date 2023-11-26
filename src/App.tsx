@@ -1,11 +1,10 @@
 import { Center, Heading, Spinner } from '@chakra-ui/react';
 
-import { connectAPI } from 'components/ConnectSubstrate/ConnectSubstrateUtils';
-
 import { useAppDispatch, useAppSelector } from 'hooks/useRedux';
 
 import { RouterProvider } from 'react-router-dom';
 import router from 'routes/routes';
+import { connectAPI } from 'utils/substrate.utils';
 
 export default function App() {
   const dispatch = useAppDispatch();

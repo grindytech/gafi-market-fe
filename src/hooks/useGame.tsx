@@ -1,9 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
 
-import { Option, StorageKey, u32 } from '@polkadot/types';
-import { PalletGameGameDetails } from '@polkadot/types/lookup';
-
 export interface useGameProps {
   filter: 'entries';
   key: string | string[] | number | number[];
@@ -25,16 +22,11 @@ export default ({ filter, key }: useGameProps) => {
         if (filter === 'entries') {
           const service = await api.query.game.game.entries();
 
-          return service.map(
-            ([game_id, meta]: [
-              StorageKey<[u32]>,
-              Option<PalletGameGameDetails>
-            ]) => ({
-              game_id: game_id.args[0].toNumber(),
-              owner: meta.value.owner.toString(),
-              admin: meta.value.admin.toString(),
-            })
-          ) as GamesFieldProps[];
+          return service.map(([game_id, meta]) => ({
+            game_id: game_id.args[0].toNumber(),
+            owner: meta.value.owner.toString(),
+            admin: meta.value.admin.toString(),
+          })) as GamesFieldProps[];
         }
       }
 

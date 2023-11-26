@@ -1,11 +1,11 @@
 import { Box, Text } from '@chakra-ui/react';
-import { formatCurrency } from 'utils/utils';
+import { formatCurrency, formatGAFI } from 'utils/utils';
 
-interface BundleLayoutPriceProps {
+interface DetailPriceProps {
   amount: number | string;
 }
 
-export default ({ amount }: BundleLayoutPriceProps) => {
+export default ({ amount }: DetailPriceProps) => {
   return (
     <Box padding={6}>
       <Box
@@ -21,11 +21,11 @@ export default ({ amount }: BundleLayoutPriceProps) => {
           color="shader.a.1000"
           lineHeight={6}
         >
-          {amount} GAFI
+          {formatGAFI(amount)} GAFI
         </Text>
 
         <Text as="span" fontSize="sm" color="shader.a.600">
-          {formatCurrency(Number(String(amount).replaceAll(',', '')))}
+          {formatCurrency(formatGAFI(amount))}
         </Text>
       </Box>
     </Box>

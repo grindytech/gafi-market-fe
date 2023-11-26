@@ -1,5 +1,5 @@
 import { Box, Center, Flex, Grid, Icon, Input, Text } from '@chakra-ui/react';
-import { cloundinary_link } from 'axios/cloudinary_axios';
+
 import RatioPicture from 'components/RatioPicture';
 import useMetaCollection from 'hooks/useMetaCollection';
 import useMetaNFT from 'hooks/useMetaNFT';
@@ -59,23 +59,23 @@ export default ({
       const common = {
         ...meta,
         nft_meta: {
-          title: currentMetaNFT?.title,
-          image: currentMetaNFT?.avatar,
+          name: currentMetaNFT?.name,
+          image: currentMetaNFT?.image,
         },
         collection_meta: {
-          title: currentMetaCollection?.title,
-          image: currentMetaCollection?.avatar,
+          name: currentMetaCollection?.name,
+          logo: currentMetaCollection?.logo,
         },
       };
 
       // find Title Of NFT
-      if (currentMetaNFT?.title.includes(search)) return common;
+      if (currentMetaNFT?.name?.includes(search)) return common;
 
       // find NFT_ID
       if (search.includes(meta.nft_id as never)) return common;
 
       // find Title Of Collection
-      if (currentMetaCollection?.title.includes(search)) return common;
+      if (currentMetaCollection?.name?.includes(search)) return common;
 
       // when not search
       if (!search.length) return common;
@@ -139,7 +139,7 @@ export default ({
                       collection_id: meta.collection_id,
                       nft_id: meta.nft_id,
                       image: meta.nft_meta.image || null,
-                      title: meta.nft_meta.title || null,
+                      name: meta.nft_meta.name || null,
                       amount: 1,
                     });
                   }
@@ -168,21 +168,15 @@ export default ({
                 </Center>
 
                 <RatioPicture
-                  src={
-                    meta.nft_meta?.image
-                      ? cloundinary_link(meta.nft_meta.image)
-                      : null
-                  }
+                  src={meta.nft_meta?.image ? meta.nft_meta.image : null}
                   sx={{ height: 60 }}
                 />
 
                 <Box padding={4}>
-                  <Text color="#71717A">
-                    {meta.collection_meta.title || '-'}
-                  </Text>
+                  <Text color="#71717A">{meta.collection_meta.name}</Text>
 
                   <Flex justifyContent="space-between">
-                    <Text fontSize="md">{meta.nft_meta.title || '-'}</Text>
+                    <Text fontSize="md">{meta.nft_meta.name}</Text>
 
                     <Text>ID: {meta.nft_id}</Text>
                   </Flex>

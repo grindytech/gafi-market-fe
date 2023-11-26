@@ -15,7 +15,7 @@ import {
 import React from 'react';
 
 import Chevron01Icon from 'public/assets/line/chevron-01.svg';
-import { BLOCK_TIME } from 'utils/constants';
+import { BLOCK_TIME } from 'utils/contants.utils';
 
 export interface ListDurationProps {
   text: string;

@@ -71,21 +71,25 @@ export default function ConnectWallet() {
       icon: ChartIcon,
       title: 'Activity',
       link: '#',
+      isDisabled: true,
     },
     {
       icon: CartIcon,
       title: 'My Cart',
       link: '#',
+      isDisabled: true,
     },
     {
       icon: LoveIcon,
       title: 'Favourited',
       link: '#',
+      isDisabled: true,
     },
     {
       icon: SettingIcon,
       title: 'Settings',
       link: '#',
+      isDisabled: true,
     },
   ];
 
@@ -102,6 +106,7 @@ export default function ConnectWallet() {
       {account && account.address && account.name && allAccount ? (
         <Drawer isOpen={isOpen} onClose={onClose} size="sm">
           <DrawerOverlay />
+
           <DrawerContent
             my={{ lg: 6, base: 0 }}
             borderRadius={{ lg: '2xl', base: 0 }}
@@ -142,11 +147,11 @@ export default function ConnectWallet() {
                         minWidth="auto"
                         height="auto"
                         width="auto"
-                        _hover={{}}
                         padding={1.5}
                         icon={<Swap02Icon />}
                       />
                     </Center>
+
                     <ConnectWalletSwitch
                       isOpen={isOpenSwitch}
                       onClose={onCloseSwitch}
@@ -172,6 +177,7 @@ export default function ConnectWallet() {
                       mb={6}
                     >
                       <Icon as={GafiTokenIcon} width={8} height={8} />
+
                       <Box mt={4}>
                         <GafiAmount
                           amount={balance}
@@ -186,10 +192,7 @@ export default function ConnectWallet() {
                         />
 
                         <Text fontSize="sm" color="shader.a.500">
-                          {formatCurrency(
-                            Number(balance.replaceAll(',', '')),
-                            'usd'
-                          )}
+                          {formatCurrency(balance)}
                         </Text>
                       </Box>
                     </Box>
@@ -208,6 +211,7 @@ export default function ConnectWallet() {
                   </Button>
                 </Flex>
               </Box>
+
               <Box
                 padding={6}
                 borderTop="0.063rem solid"
@@ -216,7 +220,17 @@ export default function ConnectWallet() {
                 <Flex gap={6} flexDirection="column">
                   {React.Children.toArray(
                     ListProfileData.map(item => (
-                      <Link to={item.link} onClick={onClose}>
+                      <Text
+                        as={Link}
+                        to={item.link}
+                        opacity={item.isDisabled ? 0.4 : undefined}
+                        pointerEvents={item.isDisabled ? 'none' : undefined}
+                        onClick={() => {
+                          if (!item.isDisabled) {
+                            onClose();
+                          }
+                        }}
+                      >
                         <HStack
                           cursor="pointer"
                           gap={3}
@@ -226,11 +240,12 @@ export default function ConnectWallet() {
                           }}
                         >
                           <Icon as={item.icon} height={6} width={6} />
+
                           <Text fontSize="lg" fontWeight="medium">
                             {item.title}
                           </Text>
                         </HStack>
-                      </Link>
+                      </Text>
                     ))
                   )}
                 </Flex>

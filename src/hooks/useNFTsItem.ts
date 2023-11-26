@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
-import { Option, StorageKey, u32 } from '@polkadot/types';
 import { PalletNftsItemDetails } from '@polkadot/types/lookup';
+import { Option } from '@polkadot/types';
 
 interface useNFTsItemProps {
   filter?: 'entries' | 'collection_id' | 'nft_id';
@@ -37,18 +37,13 @@ export default function useNFTsItem({ filter, key, arg }: useNFTsItemProps) {
 
               const service = await api.query.nfts.item.entries(collection_id);
 
-              return service.map(
-                ([option, meta]: [
-                  StorageKey<[u32, u32]>,
-                  Option<PalletNftsItemDetails>
-                ]) => {
-                  return {
-                    collection_id: option.args[0].toNumber(),
-                    nft_id: option.args[1].toNumber(),
-                    owner: meta.value.owner.toString(),
-                  };
-                }
-              );
+              return service.map(([option, meta]) => {
+                return {
+                  collection_id: option.args[0].toNumber(),
+                  nft_id: option.args[1].toNumber(),
+                  owner: meta.value.owner.toString(),
+                };
+              });
             })
           ).then(data => data.flat());
         }

@@ -59,10 +59,11 @@ declare module '@polkadot/api-base/types/errors' {
     };
     faucet: {
       DontBeGreedy: AugmentedError<ApiType>;
+      ExceedFundingAccounts: AugmentedError<ApiType>;
+      NoGenesisAccountAvailable: AugmentedError<ApiType>;
       NotEnoughBalance: AugmentedError<ApiType>;
       OutOfFaucet: AugmentedError<ApiType>;
       PleaseWait: AugmentedError<ApiType>;
-      SelfTransfer: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -126,6 +127,7 @@ declare module '@polkadot/api-base/types/errors' {
        * Transfer is locked for any trade
        **/
       ItemLocked: AugmentedError<ApiType>;
+      MetadataNotFound: AugmentedError<ApiType>;
       MintEnded: AugmentedError<ApiType>;
       MintFailed: AugmentedError<ApiType>;
       MintNotStarted: AugmentedError<ApiType>;
@@ -138,6 +140,7 @@ declare module '@polkadot/api-base/types/errors' {
       NotSwap: AugmentedError<ApiType>;
       NotWhitelisted: AugmentedError<ApiType>;
       NotWishlist: AugmentedError<ApiType>;
+      OverRequest: AugmentedError<ApiType>;
       PoolIdInUse: AugmentedError<ApiType>;
       SoldOut: AugmentedError<ApiType>;
       TradeEnded: AugmentedError<ApiType>;
@@ -348,6 +351,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       UnknownSwap: AugmentedError<ApiType>;
       /**
+       * The witness data should be provided.
+       **/
+      WitnessRequired: AugmentedError<ApiType>;
+      /**
        * The delegate turned out to be different to what was expected.
        **/
       WrongDelegate: AugmentedError<ApiType>;
@@ -375,6 +382,16 @@ declare module '@polkadot/api-base/types/errors' {
        * The provided signature is incorrect.
        **/
       WrongSignature: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    oracleRandomness: {
+      ExceedMaxRandomURL: AugmentedError<ApiType>;
+      ExceedRandomURLLength: AugmentedError<ApiType>;
+      InvalidPayload: AugmentedError<ApiType>;
+      InvalidSeed: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -425,6 +442,20 @@ declare module '@polkadot/api-base/types/errors' {
        * and the new runtime.
        **/
       SpecVersionNeedsToIncrease: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    templateModule: {
+      /**
+       * Error names should be descriptive.
+       **/
+      NoneValue: AugmentedError<ApiType>;
+      /**
+       * Errors should have helpful documentation associated with them.
+       **/
+      StorageOverflow: AugmentedError<ApiType>;
       /**
        * Generic error
        **/

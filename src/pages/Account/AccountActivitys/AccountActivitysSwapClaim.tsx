@@ -27,7 +27,6 @@ export default function AccountActivitysSwapClaim({
   return (
     <Button
       variant="cancel"
-      _hover={{}}
       isLoading={isLoading}
       onClick={() => {
         if (api) {

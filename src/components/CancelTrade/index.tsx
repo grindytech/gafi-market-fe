@@ -26,13 +26,7 @@ export default function CancelTrade({
   });
 
   return (
-    <Button
-      variant="cancel"
-      _hover={{}}
-      isLoading={isLoading}
-      onClick={mutation}
-      {...sx}
-    >
+    <Button variant="cancel" isLoading={isLoading} onClick={mutation} {...sx}>
       Cancel
     </Button>
   );

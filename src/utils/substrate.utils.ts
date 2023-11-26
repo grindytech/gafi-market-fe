@@ -1,14 +1,12 @@
 import { injectedExtension } from 'redux/injected';
-import { GAFI_WALLET_STORAGE_KEY } from 'utils/constants';
+import { GAFI_WALLET_STORAGE_KEY } from 'utils/contants.utils';
 import { getInjectedWeb3 } from 'utils/utils';
-import {
-  InjectedAccountWithMeta,
-  InjectedAccount,
-} from '@polkadot/extension-inject/types';
+
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { reduxSubstrateProps, substrateConnect } from 'redux/substrate';
 import { AppDispatch } from 'redux/store';
+import { InjectedAccount } from 'types/polkadot.type';
 
 interface mapAccountsProps {
   source: string;
@@ -28,21 +26,15 @@ interface connectAPIProps {
   dispatch: AppDispatch;
 }
 
-const mapAccounts = ({
-  source,
-  list,
-  ss58Format,
-}: mapAccountsProps): InjectedAccountWithMeta[] => {
-  return list.map(
-    ({ address, genesisHash, name, type }): InjectedAccountWithMeta => ({
-      address:
-        address.length === 42
-          ? address
-          : encodeAddress(decodeAddress(address), ss58Format),
-      meta: { genesisHash, name, source: source },
-      type,
-    })
-  );
+const mapAccounts = ({ source, list, ss58Format }: mapAccountsProps) => {
+  return list.map(({ address, genesisHash, name, type }) => ({
+    address:
+      address.length === 42
+        ? address
+        : encodeAddress(decodeAddress(address), ss58Format),
+    meta: { genesisHash, name, source: source },
+    type,
+  }));
 };
 
 const loadAccounts = async ({ extensionName, dispatch }: loadAccountsProps) => {
@@ -64,7 +56,7 @@ const loadAccounts = async ({ extensionName, dispatch }: loadAccountsProps) => {
       }
 
       if (getAccounts.length) {
-        const mappedAccounts: InjectedAccountWithMeta[] = mapAccounts({
+        const mappedAccounts = mapAccounts({
           source: extensionName,
           list: getAccounts, // filter(({ type }) => type && true),
           ss58Format: undefined,

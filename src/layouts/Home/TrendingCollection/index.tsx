@@ -2,27 +2,27 @@ import { Box, Center, Flex, HStack, Icon, Text } from '@chakra-ui/react';
 
 import CollectionIcon from 'public/assets/line/collection-02.svg';
 
-import { cloundinary_link } from 'axios/cloudinary_axios';
 import { Link } from 'react-router-dom';
-import useMetaCollection from 'hooks/useMetaCollection';
+
 import RatioPicture from 'components/RatioPicture';
 import TrendingCollectionLoading from './TrendingCollectionLoading';
 
-import useNFTsCollection from 'hooks/useNFTsCollection';
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import { Grid } from 'swiper';
+import { useQuery } from '@tanstack/react-query';
+import axiosSwagger from 'axios/axios.swagger';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { Grid } from 'swiper';
 
 export default function TrendingCollection() {
-  const { NFTsCollection, isLoading } = useNFTsCollection({
-    key: 'trendingCollection',
-    filter: 'entries',
-  });
-
-  const { MetaCollection } = useMetaCollection({
-    key: 'trendingCollection',
-    filter: 'entries',
+  const { data, isLoading } = useQuery({
+    queryKey: ['home_trendingCollection'],
+    queryFn: async () => {
+      return axiosSwagger.collectionSearch();
+    },
   });
 
   return (
@@ -45,15 +45,14 @@ export default function TrendingCollection() {
       <Box mt={4}>
         {isLoading && <TrendingCollectionLoading />}
 
-        {NFTsCollection?.length ? (
+        {data?.data?.length ? (
           <Box
             sx={{
-              '.swiper-wrapper': { rowGap: 2 },
               '.swiper-slide': { mt: '0!' },
             }}
           >
             <Swiper
-              spaceBetween={24}
+              spaceBetween={32}
               modules={[Grid]}
               breakpoints={{
                 0: {
@@ -74,77 +73,65 @@ export default function TrendingCollection() {
                 },
               }}
             >
-              {NFTsCollection.map(({ collection_id }, index) => {
-                const currentMetaCollection = MetaCollection?.find(
-                  meta => meta?.collection_id === collection_id
-                );
+              {data.data.map(meta => (
+                <SwiperSlide key={meta.id}>
+                  <HStack
+                    as={Link}
+                    spacing={4}
+                    to={`/collection/${meta.collection_id}`}
+                    border="0.0625rem solid transparent"
+                    transitionDuration="ultra-slow"
+                    borderRadius="xl"
+                    padding={4}
+                    _hover={{
+                      borderColor: 'shader.a.400',
+                      bg: 'shader.a.200',
+                    }}
+                  >
+                    <Box>
+                      <RatioPicture
+                        alt={meta.collection_id}
+                        src={meta.logo}
+                        sx={{ width: 16, height: 16 }}
+                      />
+                    </Box>
 
-                if (index <= 11) {
-                  return (
-                    <SwiperSlide key={collection_id}>
-                      <HStack
-                        as={Link}
-                        spacing={4}
-                        to={`/collection/${collection_id}`}
-                        border="0.0625rem solid transparent"
-                        transitionDuration="ultra-slow"
-                        borderRadius="xl"
-                        padding={4}
-                        _hover={{
-                          borderColor: 'shader.a.400',
-                          bg: 'shader.a.200',
-                        }}
+                    <Box>
+                      <Text
+                        fontSize="lg"
+                        fontWeight="medium"
+                        color="shader.a.900"
+                        noOfLines={1}
+                      >
+                        {meta.name}
+                      </Text>
+
+                      <Flex
+                        mt={0.5}
+                        gap={{ base: 2, md: 6 }}
+                        fontSize="sm"
+                        color="shader.a.600"
                       >
                         <Box>
-                          <RatioPicture
-                            alt={`trendingCollection-${collection_id}`}
-                            src={
-                              currentMetaCollection?.avatar
-                                ? cloundinary_link(currentMetaCollection.avatar)
-                                : null
-                            }
-                            sx={{ width: 16, height: 16 }}
-                          />
+                          <Text>Floor Price:&nbsp;</Text>
+
+                          <Text color="shader.a.900" fontWeight="medium">
+                            0.00 GAFI
+                          </Text>
                         </Box>
 
                         <Box>
-                          <Text
-                            fontSize="lg"
-                            fontWeight="medium"
-                            color="shader.a.900"
-                            noOfLines={1}
-                          >
-                            {currentMetaCollection?.title || 'unknown'}
+                          <Text>Vol:&nbsp;</Text>
+
+                          <Text color="shader.a.900" fontWeight="medium">
+                            0.00 GAFI
                           </Text>
-
-                          <Flex
-                            mt={0.5}
-                            gap={{ base: 2, md: 6 }}
-                            fontSize="sm"
-                            color="shader.a.600"
-                          >
-                            <Box>
-                              <Text>Floor Price:&nbsp;</Text>
-
-                              <Text color="shader.a.900" fontWeight="medium">
-                                0.00 GAFI
-                              </Text>
-                            </Box>
-
-                            <Box>
-                              <Text>Vol:&nbsp;</Text>
-
-                              <Text color="shader.a.900" fontWeight="medium">
-                                0.00 GAFI
-                              </Text>
-                            </Box>
-                          </Flex>
                         </Box>
-                      </HStack>
-                    </SwiperSlide>
-                  );
-                }
-              })}
+                      </Flex>
+                    </Box>
+                  </HStack>
+                </SwiperSlide>
+              ))}
             </Swiper>
           </Box>
         ) : isLoading ? null : (

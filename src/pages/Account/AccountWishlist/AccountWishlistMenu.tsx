@@ -1,11 +1,11 @@
 import { UseFormSetValue } from 'react-hook-form';
 import { AccountWishlistFieldProps } from '.';
 import { ItemBalanceOfProps } from 'hooks/useItemBalanceOf';
-import BundleLayoutMenu from 'layouts/BundleLayout/BundleLayoutMenu';
 
 import SelectIcon from 'public/assets/line/select.svg';
 import TrashIcon from 'public/assets/line/trash.svg';
-import { WISHLIST_STORAGE_KEY } from 'utils/constants';
+import { WISHLIST_STORAGE_KEY } from 'utils/contants.utils';
+import DetailMenu from 'layouts/Detail/DetailMenu';
 
 interface AccountWishlistMenuProps {
   setValue: UseFormSetValue<AccountWishlistFieldProps>;
@@ -41,5 +41,5 @@ export default ({
     },
   ];
 
-  return <BundleLayoutMenu menu={ListMenu} />;
+  return <DetailMenu menu={ListMenu} />;
 };

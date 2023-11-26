@@ -1,6 +1,6 @@
 import UploadIcon from 'public/assets/line/upload.svg';
 import { Button, Icon, Text } from '@chakra-ui/react';
-import { GAFI_WALLET_ACCOUNT_KEY } from 'utils/constants';
+import { GAFI_WALLET_ACCOUNT_KEY } from 'utils/contants.utils';
 import { useAppDispatch } from 'hooks/useRedux';
 import { injectedAccount } from 'redux/injected';
 

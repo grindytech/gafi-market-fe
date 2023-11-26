@@ -48,7 +48,7 @@ export default function NFTDetailListOffer({
               <Tr>
                 <Td>
                   <GafiAmount
-                    amount={Number(meta.maybePrice.value.toNumber())}
+                    amount={meta.maybePrice.value.toNumber()}
                     sx={{
                       sx: {
                         '&, span': { color: 'shader.a.900', fontSize: 'sm' },
@@ -57,7 +57,7 @@ export default function NFTDetailListOffer({
                   />
 
                   <Text as="span">
-                    {formatCurrency(Number(meta.maybePrice.value.toNumber()))}
+                    {formatCurrency(meta.maybePrice.value.toNumber())}
                   </Text>
                 </Td>
 

@@ -6,7 +6,7 @@ import { isNull } from '@polkadot/util';
 import { useAppSelector } from 'hooks/useRedux';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { GAFI_WALLET_ACCOUNT_KEY } from 'utils/constants';
+import { GAFI_WALLET_ACCOUNT_KEY } from 'utils/contants.utils';
 
 export default function AccountSetting() {
   const { address } = useParams();

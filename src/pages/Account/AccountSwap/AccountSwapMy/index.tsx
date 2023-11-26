@@ -4,7 +4,7 @@ import { useAppSelector } from 'hooks/useRedux';
 import { Control, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
 import DurationBlock, { ListDurationProps } from 'components/DurationBlock';
-import { BLOCK_TIME } from 'utils/constants';
+import { BLOCK_TIME } from 'utils/contants.utils';
 import { useEffect, useState } from 'react';
 import { AccountSwapFieldProps } from '..';
 import AccountSwapReceive from '../AccountSwapReceive';

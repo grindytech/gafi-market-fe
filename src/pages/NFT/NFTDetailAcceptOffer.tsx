@@ -31,7 +31,6 @@ export default function NFTDetailAcceptOffer({
   return (
     <Button
       variant="primary"
-      _hover={{}}
       isLoading={isLoading}
       onClick={() => {
         if (api) {

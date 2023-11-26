@@ -1,6 +1,6 @@
 import { Table, Tbody, Td, Text, Tr } from '@chakra-ui/react';
 import React from 'react';
-import { formatCurrency, shorten } from 'utils/utils';
+import { formatCurrency, formatGAFI, shorten } from 'utils/utils';
 
 import NFTDetailBuy from './NFTDetailBuy';
 import GafiAmount from 'components/GafiAmount';
@@ -47,7 +47,7 @@ export default function NFTDetailListing({
               <Tr>
                 <Td>
                   <GafiAmount
-                    amount={Number(meta.maybePrice.value.toNumber())}
+                    amount={formatGAFI(meta.maybePrice.value.toString())}
                     sx={{
                       sx: {
                         '&, span': { color: 'shader.a.900', fontSize: 'sm' },
@@ -56,7 +56,9 @@ export default function NFTDetailListing({
                   />
 
                   <Text as="span">
-                    {formatCurrency(Number(meta.maybePrice.value.toNumber()))}
+                    {formatCurrency(
+                      formatGAFI(meta.maybePrice.value.toString())
+                    )}
                   </Text>
                 </Td>
 
@@ -70,7 +72,7 @@ export default function NFTDetailListing({
                   <Text as="span">From</Text>
 
                   <Text color="primary.a.500!">
-                    {shorten(String(meta.owner.toString()), 12)}
+                    {shorten(String(meta.owner.toString()))}
                   </Text>
                 </Td>
 
@@ -94,7 +96,7 @@ export default function NFTDetailListing({
 
                   <NFTDetailBuy
                     amount={meta.amount}
-                    fee={meta.maybePrice.value.toNumber()}
+                    fee={meta.maybePrice.value.toString()}
                     trade_id={meta.trade_id}
                     refetch={refetch}
                     sx={{ borderRadius: 'lg' }}

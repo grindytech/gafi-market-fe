@@ -2,7 +2,7 @@ import { useState } from 'react';
 import AccountOwnerAuction from './AccountOwnerAuction';
 import AccountOwnerSale from './AccountOwnerSale';
 import { ListDurationProps } from 'components/DurationBlock';
-import { BLOCK_TIME } from 'utils/constants';
+import { BLOCK_TIME } from 'utils/contants.utils';
 import {
   Box,
   Tab,

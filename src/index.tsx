@@ -10,7 +10,7 @@ import '@fontsource-variable/lexend';
 import theme from 'theme/theme';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import getQueryClient from 'utils/queryClient';
+import getQueryClient from 'utils/queryclient.utils';
 import App from 'App';
 
 import { Provider } from 'react-redux';

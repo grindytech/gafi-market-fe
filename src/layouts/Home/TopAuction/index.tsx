@@ -6,45 +6,44 @@ import {
   Icon,
   Text,
 } from '@chakra-ui/react';
-import useAuctionConfigOf from 'hooks/useAuctionConfigOf';
-import useHighestBidOf from 'hooks/useHighestBidOf';
 import { Swiper, SwiperSlide } from 'swiper/react';
-
-import useBundleOf from 'hooks/useBundleOf';
 import RatioPicture from 'components/RatioPicture';
 import useMetaNFT from 'hooks/useMetaNFT';
 import DateBlock from 'components/DateBlock';
-import { cloundinary_link } from 'axios/cloudinary_axios';
-import React from 'react';
+
 import TopAuctionSkeleton from './TopAuctionSkeleton';
 import { Link } from 'react-router-dom';
 import HandIcon from 'public/assets/line/hand.svg';
+import { useQuery } from '@tanstack/react-query';
+import axiosSwagger from 'axios/axios.swagger';
+import { formatGAFI } from 'utils/utils';
 
 export default () => {
-  const { auctionConfigOf, isLoading } = useAuctionConfigOf({
-    key: `home_TopAuction`,
-    filter: 'entries',
-  });
-
-  const { bundleOf, isLoading: bundleLoading } = useBundleOf({
-    key: `home_TopAuction/isLoading=${isLoading}`,
-    filter: 'trade_id',
-    arg: auctionConfigOf?.map(({ trade_id }) => trade_id),
-  });
-
-  const { highestBidOf } = useHighestBidOf({
-    key: `home_TopAuction/isLoading=${isLoading}`,
-    filter: 'trade_id',
-    arg: auctionConfigOf?.map(meta => meta.trade_id),
+  const { data, isLoading } = useQuery({
+    queryKey: ['home_TopAuction'],
+    queryFn: async () => {
+      return axiosSwagger.tradeSearch({
+        body: {
+          size: 5,
+          query: {
+            trade_type: 'SetAuction',
+          },
+        },
+      });
+    },
   });
 
   const { metaNFT } = useMetaNFT({
-    key: `home_TopAuction/isLoading=[${bundleLoading}, ${isLoading}]`,
+    key: `home_TopAuction`,
     filter: 'collection_id',
-    arg: bundleOf?.map(({ collection_id, nft_id }) => ({
-      collection_id,
-      nft_id,
-    })),
+    arg: data?.data
+      .map(meta => meta.source)
+      .flat()
+      .map(({ collection, item }) => ({
+        collection_id: Number(collection),
+        nft_id: Number(item),
+      })),
+    async: isLoading,
   });
 
   return (
@@ -60,7 +59,7 @@ export default () => {
       <Box mt={4}>
         {isLoading && <TopAuctionSkeleton />}
 
-        {bundleOf?.length && auctionConfigOf?.length ? (
+        {data?.data.length ? (
           <GridChakra
             gridTemplateColumns={{
               sm: 'repeat(2, 1fr)',
@@ -80,107 +79,71 @@ export default () => {
               },
             }}
           >
-            {auctionConfigOf.map(({ duration, maybePrice, trade_id }) => {
-              const HighestBid = highestBidOf?.find(
-                meta => meta.trade_id === trade_id
-              );
+            {data.data.map(meta => (
+              <Swiper loop={true} spaceBetween={32} key={meta.trade_id}>
+                {meta.source.map(({ collection, item }) => {
+                  const currentMetaNFT = metaNFT?.find(
+                    meta =>
+                      meta.collection_id === Number(collection) &&
+                      meta.nft_id === Number(item)
+                  );
 
-              return (
-                <Swiper loop={true} spaceBetween={32} key={trade_id}>
-                  {React.Children.toArray(
-                    bundleOf.map(
-                      ({ collection_id, nft_id, trade_id: tradeBundle }) => {
-                        const currentMetaNFT = metaNFT?.find(
-                          meta =>
-                            meta.collection_id === collection_id &&
-                            meta.nft_id === nft_id
-                        );
+                  return (
+                    <SwiperSlide key={`${collection}/${item}`}>
+                      <Box
+                        bg="#27272A"
+                        borderRadius="xl"
+                        border="0.0625rem solid #3F3F46"
+                        boxShadow="0px 0px 20px 0px rgba(0, 0, 0, 0.10)"
+                      >
+                        <Link to={`/auction/${meta.trade_id}`}>
+                          <RatioPicture src={currentMetaNFT?.image || null} />
 
-                        if (tradeBundle === trade_id) {
-                          return (
-                            <SwiperSlide>
-                              <Box
-                                bg="#27272A"
-                                borderRadius="xl"
-                                border="0.0625rem solid #3F3F46"
-                                boxShadow="0px 0px 20px 0px rgba(0, 0, 0, 0.10)"
-                              >
-                                <Link to={`/auction/${trade_id}`}>
-                                  <RatioPicture
-                                    src={
-                                      currentMetaNFT?.avatar
-                                        ? cloundinary_link(
-                                            currentMetaNFT.avatar
-                                          )
-                                        : null
-                                    }
-                                  />
+                          <Box bg="#3F3F46" padding={4} pt={6}>
+                            <Center
+                              justifyContent="space-between"
+                              fontWeight="medium"
+                              color="white"
+                            >
+                              <Text>{currentMetaNFT?.name}</Text>
 
-                                  <Box bg="#3F3F46" padding={4} pt={6}>
-                                    <Center
-                                      justifyContent="space-between"
-                                      fontWeight="medium"
-                                      color="white"
-                                    >
-                                      <Text>
-                                        {currentMetaNFT?.title || 'unknown'}
-                                      </Text>
+                              <Text fontSize="sm">ID: {meta.trade_id}</Text>
+                            </Center>
 
-                                      <Text fontSize="sm">ID: {nft_id}</Text>
-                                    </Center>
+                            <Center
+                              justifyContent="space-between"
+                              fontSize="sm"
+                            >
+                              <Text color="#A1A1AA">Highest bid</Text>
 
-                                    <Center
-                                      justifyContent="space-between"
-                                      fontSize="sm"
-                                    >
-                                      <Text color="#A1A1AA">Highest bid</Text>
+                              <Text color="white" fontWeight="medium">
+                                {formatGAFI(meta.highest_bid || meta.price)}
+                                &nbsp; GAFI
+                              </Text>
+                            </Center>
 
-                                      <Text color="white" fontWeight="medium">
-                                        {HighestBid?.bidPrice.toHuman() ||
-                                          maybePrice.value.toHuman() ||
-                                          0}
-                                        &nbsp; GAFI
-                                      </Text>
-                                    </Center>
-
-                                    <Text
-                                      color="#E4E4E7"
-                                      fontSize="xs"
-                                      mt={0.5}
-                                    >
-                                      Start in:&nbsp;
-                                      <DateBlock
-                                        endBlock={
-                                          duration.isEmpty
-                                            ? -1
-                                            : duration.toNumber()
-                                        }
-                                        end={
-                                          duration.isEmpty
-                                            ? 'Infinity'
-                                            : 'Expired'
-                                        }
-                                        sx={{
-                                          as: 'span',
-                                          fontWeight: 'medium',
-                                          color: 'white',
-                                        }}
-                                      />
-                                    </Text>
-                                  </Box>
-                                </Link>
-                              </Box>
-                            </SwiperSlide>
-                          );
-                        }
-                      }
-                    )
-                  )}
-                </Swiper>
-              );
-            })}
+                            <Text color="#E4E4E7" fontSize="xs" mt={0.5}>
+                              Start in:&nbsp;
+                              <DateBlock
+                                endBlock={meta.duration || -1}
+                                end={meta.duration ? 'Expired' : 'Infinity'}
+                                sx={{
+                                  as: 'span',
+                                  fontWeight: 'medium',
+                                  color: 'white',
+                                }}
+                              />
+                            </Text>
+                          </Box>
+                        </Link>
+                      </Box>
+                    </SwiperSlide>
+                  );
+                })}
+              </Swiper>
+            ))}
           </GridChakra>
-        ) : isLoading ? null : (
+        ) : (
           <Center>Empty</Center>
         )}
       </Box>

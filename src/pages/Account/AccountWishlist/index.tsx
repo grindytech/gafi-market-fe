@@ -8,7 +8,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { cloundinary_link } from 'axios/cloudinary_axios';
+
 import RatioPicture from 'components/RatioPicture';
 import { ItemBalanceOfProps } from 'hooks/useItemBalanceOf';
 import useMetaCollection from 'hooks/useMetaCollection';
@@ -22,7 +22,7 @@ import {
 } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import { WISHLIST_STORAGE_KEY } from 'utils/constants';
+import { WISHLIST_STORAGE_KEY } from 'utils/contants.utils';
 import BlockIcon from 'public/assets/line/block.svg';
 import { colors } from 'theme/theme';
 import { convertHex } from 'utils/utils';
@@ -173,21 +173,17 @@ function AccountWishlistService({
                 }}
               >
                 <RatioPicture
-                  src={
-                    currentMetaNFT?.avatar
-                      ? cloundinary_link(currentMetaNFT.avatar)
-                      : null
-                  }
+                  src={currentMetaNFT?.image || null}
                   sx={{ height: 56, borderRadius: 'inherit' }}
                 />
 
                 <Box padding={4} position="relative" fontWeight="medium">
                   <Text as="strong" fontSize="sm" color="shader.a.500">
-                    {currentMetaCollection?.title || '-'}
+                    {currentMetaCollection?.name}
                   </Text>
 
                   <Center justifyContent="space-between" color="shader.a.900">
-                    <Text>{currentMetaNFT?.title || '-'}</Text>
+                    <Text>{currentMetaNFT?.name}</Text>
 
                     <Text as="span" fontSize="sm">
                       ID: {meta.nft_id}
@@ -249,13 +245,7 @@ function AccountWishlistService({
             Clear selected ({isSelected})
           </Button>
 
-          <Button
-            variant="primary"
-            px={6}
-            _hover={{}}
-            bg="shader.a.1000"
-            onClick={onOpen}
-          >
+          <Button variant="primary" px={6} bg="shader.a.1000" onClick={onOpen}>
             Create wishlist
           </Button>
 

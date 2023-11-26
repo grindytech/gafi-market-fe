@@ -1,9 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
 
-import { GafiSupportGameTypesLoot } from '@polkadot/types/lookup';
-import { Vec } from '@polkadot/types';
-
 export interface lootTableOfProps {
   weight: number;
   maybeNfT: { collection_id: number; nft_id: number } | null;
@@ -50,9 +47,7 @@ export default function useLootTableOf({
         if (filter === 'pool_id' && arg) {
           return Promise.all(
             arg.map(async pool_id => {
-              const service = (await api.query.game.lootTableOf(
-                pool_id
-              )) as Vec<GafiSupportGameTypesLoot>;
+              const service = await api.query.game.lootTableOf(pool_id);
 
               return service.map(meta => ({
                 pool_id,

@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppSelector } from './useRedux';
 import { TypeMetadataOfPool } from 'types';
-import { Option, StorageKey, u32 } from '@polkadot/types';
-import { PalletGamePoolMetadata } from '@polkadot/types/lookup';
 
 export interface useMetaPoolProps {
   filter: 'entries' | 'pool_id';
@@ -24,22 +22,17 @@ export default ({ filter, arg, key }: useMetaPoolProps) => {
         if (filter === 'entries') {
           const service = await api.query.game.poolMetadataOf.entries();
 
-          return service.map(
-            ([key, option]: [
-              StorageKey<[u32]>,
-              Option<PalletGamePoolMetadata>
-            ]) => {
-              const metadata = JSON.parse(
-                String(option.value.data.toHuman())
-              ) as TypeMetadataOfPool;
+          return service.map(([key, option]) => {
+            const metadata = JSON.parse(
+              String(option.value.data.toHuman())
+            ) as TypeMetadataOfPool;
 
-              return {
-                pool_id: key.args[0].toNumber(),
-                title: metadata.title,
-                description: metadata.description,
-              } as MetaPoolFieldProps;
-            }
-          );
+            return {
+              pool_id: key.args[0].toNumber(),
+              title: metadata.title,
+              description: metadata.description,
+            } as MetaPoolFieldProps;
+          });
         }
 
         if (filter === 'pool_id' && arg) {

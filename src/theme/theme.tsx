@@ -49,6 +49,7 @@ export const styles = {
     body: {
       bg: 'shader.a.100',
       overflowX: 'hidden',
+      lineHeight: 'normal',
     },
     '*': {
       scrollBehavior: 'smooth',
@@ -73,7 +74,7 @@ export const fonts = {
   },
 };
 
-const CardBox: ComponentStyleConfig = {
+export const CardBox: ComponentStyleConfig = {
   variants: {
     createGames: {
       bg: 'white',
@@ -94,7 +95,7 @@ const CardBox: ComponentStyleConfig = {
   },
 };
 
-const Button: ComponentStyleConfig = {
+export const Button: ComponentStyleConfig = {
   variants: {
     unstyled: {
       minWidth: 'auto',
@@ -108,6 +109,10 @@ const Button: ComponentStyleConfig = {
       borderRadius: 'lg',
       _hover: {
         bg: 'primary.a.600',
+
+        ['&:disabled']: {
+          bg: 'primary.a.600',
+        },
       },
     },
     baseStyle: {
@@ -169,7 +174,7 @@ export const Table: ComponentStyleConfig = {
   },
 };
 
-const Heading: ComponentStyleConfig = {
+export const Heading: ComponentStyleConfig = {
   variants: {
     game: {
       fontSize: 'md',

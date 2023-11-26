@@ -16,28 +16,28 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { cloundinary_link } from 'axios/cloudinary_axios';
-import GafiAmount from 'components/GafiAmount';
 
 import { useAppSelector } from 'hooks/useRedux';
 import useSignAndSend from 'hooks/useSignAndSend';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { formatCurrency } from 'utils/utils';
+import { formatCurrency, formatGAFI } from 'utils/utils';
 
 import useBlockTime from 'hooks/useBlockTime';
 import DurationBlock, { ListDurationProps } from 'components/DurationBlock';
 import RatioPicture from 'components/RatioPicture';
-import { BLOCK_TIME } from 'utils/constants';
-import { TypeMetadataOfCollection } from 'types';
+
 import { MetaNFTFieldProps } from 'hooks/useMetaNFT';
+import { BLOCK_TIME, unitGAFI } from 'utils/contants.utils';
+import BigNumber from 'bignumber.js';
+import { MetaCollectionFieldProps } from 'hooks/useMetaCollection';
 
 interface NFTDetailOfferProps {
   fee: number;
   amount: number | undefined;
   metaNFT: MetaNFTFieldProps | undefined;
-  metaCollection: TypeMetadataOfCollection[] | undefined;
+  metaCollection: MetaCollectionFieldProps[] | undefined;
 }
 
 export default function NFTDetailOffer({
@@ -60,7 +60,7 @@ export default function NFTDetailOffer({
     watch,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm<{ priceOffer: number; amountOffer: number }>();
 
   const ListDuration: ListDurationProps[] = [
     {
@@ -101,6 +101,8 @@ export default function NFTDetailOffer({
     setDuration(ListDuration[0]);
   };
 
+  const { amountOffer, priceOffer } = watch();
+
   const { isLoading, mutation } = useSignAndSend({
     key: ['make_offer', String(nft_id)],
     address: account?.address as string,
@@ -115,7 +117,6 @@ export default function NFTDetailOffer({
       borderRadius="3xl"
       isLoading={isLoading}
       onClick={onOpen}
-      _hover={{}}
     >
       Make offer
       {isOpen && (
@@ -142,18 +143,23 @@ export default function NFTDetailOffer({
                 fontWeight: 'normal',
                 fontSize: 'sm',
               },
-              '.amount-gafi': {
-                color: 'shader.a.900',
-                fontSize: 'sm',
-                fontWeight: 'medium',
-              },
             }}
-            onSubmit={handleSubmit(({ price, amount }) => {
+            onSubmit={handleSubmit(() => {
               if (api) {
                 mutation(
                   api.tx.game.setOrder(
-                    { collection: collection_id, item: nft_id, amount },
-                    price,
+                    {
+                      collection: Number(collection_id),
+                      item: Number(nft_id),
+                      amount,
+                    },
+                    BigInt(
+                      unitGAFI(
+                        BigNumber(priceOffer)
+                          .multipliedBy(amountOffer)
+                          .toFixed()
+                      )
+                    ),
                     blockNumber, // start_block
                     blockNumber + duration.time // end_block
                   )
@@ -185,15 +191,13 @@ export default function NFTDetailOffer({
                 <Flex gap={4}>
                   <RatioPicture
                     alt={nft_id}
-                    src={
-                      metaNFT?.avatar ? cloundinary_link(metaNFT?.avatar) : null
-                    }
+                    src={metaNFT?.image || null}
                     sx={{ width: 32 }}
                   />
 
                   <Box>
                     <Text color="primary.a.500" fontWeight="medium">
-                      {metaCollection?.[0]?.title || '-'}
+                      {metaCollection?.[0]?.name}
                     </Text>
 
                     <Text
@@ -202,7 +206,7 @@ export default function NFTDetailOffer({
                       fontWeight="semibold"
                       fontSize="xl"
                     >
-                      {metaNFT?.title || 'unknown'}
+                      {metaNFT?.name}
 
                       {amount ? (
                         <Text
@@ -230,37 +234,34 @@ export default function NFTDetailOffer({
                 <Text as="span">Best offer</Text>
 
                 <Box textAlign="right">
-                  <GafiAmount
-                    amount={fee}
-                    sx={{
-                      className: 'amount-gafi',
-                      sx: {
-                        span: {
-                          color: 'inherit!',
-                          fontSize: 'inherit',
-                          fontWeight: 'inherit',
-                        },
-                      },
-                    }}
-                  />
+                  <Text fontWeight="medium" fontSize="sm">
+                    {formatGAFI(fee)}&nbsp;
+                    <Text as="span">GAFI</Text>
+                  </Text>
 
-                  <Text as="span">{formatCurrency(fee, 'usd')}</Text>
+                  <Text as="span">{formatCurrency(formatGAFI(fee))}</Text>
                 </Box>
               </Flex>
 
-              <FormControl isRequired={true} isInvalid={!!errors.price}>
+              <FormControl isRequired={true} isInvalid={!!errors.priceOffer}>
                 <Input
                   placeholder="Enter offer"
                   isRequired={false}
-                  {...register('price', { required: true })}
+                  {...register('priceOffer', {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
                 />
               </FormControl>
 
-              <FormControl isRequired={true} isInvalid={!!errors.amount}>
+              <FormControl isRequired={true} isInvalid={!!errors.amountOffer}>
                 <Input
                   placeholder="Enter Amount"
                   isRequired={false}
-                  {...register('amount', { required: true })}
+                  {...register('amountOffer', {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
                 />
               </FormControl>
 
@@ -279,37 +280,28 @@ export default function NFTDetailOffer({
               justifyContent="space-between"
               display="block"
             >
-              <Flex justifyContent="space-between">
-                <Text as="span">Total value</Text>
+              {priceOffer && amountOffer ? (
+                <Flex justifyContent="space-between" mb={4}>
+                  <Text as="span">Total value</Text>
 
-                <Box textAlign="right">
-                  <GafiAmount
-                    amount={watch().price || 0}
-                    sx={{
-                      className: 'amount-gafi',
-                      sx: {
-                        span: {
-                          color: 'inherit!',
-                          fontSize: 'inherit',
-                          fontWeight: 'inherit',
-                        },
-                      },
-                    }}
-                  />
+                  <Box textAlign="right">
+                    <Text fontWeight="medium" fontSize="sm">
+                      {priceOffer * amountOffer}&nbsp;
+                      <Text as="span">GAFI</Text>
+                    </Text>
 
-                  <Text as="span">
-                    {formatCurrency(Number(watch().price || 0), 'usd')}
-                  </Text>
-                </Box>
-              </Flex>
+                    <Text as="span">
+                      {formatCurrency(priceOffer * amountOffer)}
+                    </Text>
+                  </Box>
+                </Flex>
+              ) : null}
 
               <Button
                 isLoading={isLoading}
                 variant="primary"
                 width="full"
                 type="submit"
-                mt={4}
-                _hover={{}}
               >
                 Make offer
               </Button>

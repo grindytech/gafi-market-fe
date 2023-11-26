@@ -1,10 +1,10 @@
 import { Text } from '@chakra-ui/react';
 
-interface BundleLayoutAmountProps {
+interface DetailAmountProps {
   amount: number;
 }
 
-export default ({ amount }: BundleLayoutAmountProps) => {
+export default ({ amount }: DetailAmountProps) => {
   return (
     <Text fontSize="sm" color="shader.a.500">
       Amount&nbsp;

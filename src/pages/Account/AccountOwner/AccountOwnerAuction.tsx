@@ -14,6 +14,7 @@ import useBlockTime from 'hooks/useBlockTime';
 import useSignAndSend from 'hooks/useSignAndSend';
 import useSubscribeSystem from 'hooks/useSubscribeSystem';
 import { useNavigate } from 'react-router-dom';
+import { unitGAFI } from 'utils/contants.utils';
 
 interface AccountOwnerAuctionProps {
   watch: UseFormWatch<AccountOwnerFieldProps>;
@@ -101,24 +102,25 @@ export default function AccountOwnerAuction({
         borderTop="0.0625rem solid"
         borderColor="shader.a.300"
       >
-        <Flex justifyContent="space-between">
-          <Text>Total Purchase</Text>
+        {price ? (
+          <Flex justifyContent="space-between" mb={4}>
+            <Text>Total Purchase</Text>
 
-          <Box textAlign="right">
-            <Text color="shader.a.900">{price || 0} GAFI</Text>
+            <Box textAlign="right">
+              <Text color="shader.a.900">{price} GAFI</Text>
 
-            <Text as="span" fontSize="sm" fontWeight="normal">
-              {formatCurrency(Number(price) || 0, 'usd')}
-            </Text>
-          </Box>
-        </Flex>
+              <Text as="span" fontSize="sm" fontWeight="normal">
+                {formatCurrency(price)}
+              </Text>
+            </Box>
+          </Flex>
+        ) : null}
 
         <Button
           mt={4}
           borderRadius="xl"
           width="full"
           variant="primary"
-          _hover={{}}
           type="submit"
           isLoading={isLoading}
           onClick={event => {
@@ -132,7 +134,7 @@ export default function AccountOwnerAuction({
                     item: nft_id,
                     amount: selected[index],
                   })),
-                  price,
+                  BigInt(unitGAFI(price)),
                   0, // block_number >= (config.start_block + config.duration),
                   blockNumber + duration.time
                 )

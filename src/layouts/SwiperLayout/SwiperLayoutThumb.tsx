@@ -1,5 +1,3 @@
-import { cloundinary_link } from 'axios/cloudinary_axios';
-import CardBox from 'components/CardBox';
 import RatioPicture from 'components/RatioPicture';
 import SwiperThumbs from 'layouts/SwiperThumbs';
 import SwiperThumbsButton from 'layouts/SwiperThumbs/SwiperThumbsButton';
@@ -7,8 +5,9 @@ import React, { PropsWithChildren } from 'react';
 import { SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper/types';
 import { MetaNFTFieldProps } from 'hooks/useMetaNFT';
+import DetailPreviewNFT from 'layouts/Detail/DetailPreviewNFT';
 
-interface BundleLayoutModelSwiper extends PropsWithChildren {
+interface SwiperLayoutThumbProps extends PropsWithChildren {
   swiperRef: React.MutableRefObject<SwiperType | undefined>;
   thumbs: SwiperType | null;
   metaNFT: MetaNFTFieldProps[] | undefined;
@@ -21,17 +20,9 @@ export default ({
   bundleOf,
   metaNFT,
   children,
-}: BundleLayoutModelSwiper) => {
+}: SwiperLayoutThumbProps) => {
   return (
-    <CardBox
-      variant="baseStyle"
-      padding={0}
-      position={{ base: 'relative', lg: 'sticky' }}
-      top={24}
-      overflow="hidden"
-      height="fit-content"
-      role="group"
-    >
+    <DetailPreviewNFT>
       <SwiperThumbs swiperRef={swiperRef} thumbs={thumbs as SwiperType}>
         <SwiperThumbsButton swiperRef={swiperRef} />
 
@@ -45,11 +36,7 @@ export default ({
             return (
               <SwiperSlide>
                 <RatioPicture
-                  src={
-                    currentMetaNFT?.avatar
-                      ? cloundinary_link(currentMetaNFT.avatar)
-                      : null
-                  }
+                  src={currentMetaNFT?.image || null}
                   sx={{ ratio: { base: 16 / 9, lg: 1 / 1 } }}
                 />
               </SwiperSlide>
@@ -59,6 +46,6 @@ export default ({
       </SwiperThumbs>
 
       {children}
-    </CardBox>
+    </DetailPreviewNFT>
   );
 };

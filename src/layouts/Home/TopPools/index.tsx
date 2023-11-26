@@ -12,41 +12,33 @@ import RatioPicture from 'components/RatioPicture';
 import { convertHex, formatGAFI } from 'utils/utils';
 import DateBlock from 'components/DateBlock';
 
-import usePoolOf from 'hooks/usePoolOf';
 import TopPoolsSkeleton from './TopPoolsSkeleton';
 
-import useMetaPool from 'hooks/useMetaPool';
-
-import useLootTableOf from 'hooks/useLootTableOf';
+import { useQuery } from '@tanstack/react-query';
+import axiosSwagger from 'axios/axios.swagger';
 import useMetaNFT from 'hooks/useMetaNFT';
-import { cloundinary_link } from 'axios/cloudinary_axios';
 
 export default function TopPools() {
-  const { poolOf, isLoading } = usePoolOf({
-    key: 'home_TopPools',
-    filter: 'entries',
-  });
-
-  const { lootTableOf, isLoading: lootLoading } = useLootTableOf({
-    key: `home_TopPools/isLoading=${isLoading}`,
-    filter: 'pool_id',
-    arg: poolOf?.map(({ pool_id }) => pool_id),
+  const { data, isLoading } = useQuery({
+    queryKey: ['home_topPool'],
+    queryFn: async () => {
+      return await axiosSwagger.poolSearch({
+        body: { size: 5 },
+      });
+    },
   });
 
   const { metaNFT } = useMetaNFT({
-    key: `home_TopPools/isLoading=[${isLoading}, ${lootLoading}]`,
+    key: 'home_topPool',
     filter: 'collection_id',
-    arg: lootTableOf
-      ?.filter(meta => !!meta.maybeNfT)
-      .map(({ maybeNfT }) => ({
-        collection_id: maybeNfT?.collection_id as number,
-        nft_id: maybeNfT?.nft_id as number,
+    arg: data?.data
+      .map(({ loot_table }) => loot_table[0].nft)
+      .filter(meta => meta?.collection && meta?.item)
+      .map(({ collection, item }) => ({
+        collection_id: Number(collection),
+        nft_id: Number(item),
       })),
-  });
-
-  const { MetaPool } = useMetaPool({
-    key: 'home_TopPools',
-    filter: 'entries',
+    async: isLoading,
   });
 
   return (
@@ -69,7 +61,7 @@ export default function TopPools() {
       <Box mt={6}>
         {isLoading && <TopPoolsSkeleton />}
 
-        {poolOf?.length ? (
+        {data?.data?.length ? (
           <Swiper
             spaceBetween={20}
             modules={[Grid]}
@@ -92,104 +84,70 @@ export default function TopPools() {
               },
             }}
           >
-            {poolOf.map(({ endBlock, pool_id, price, poolType }, index) => {
-              const currentMetaPool = MetaPool?.find(
-                meta => meta.pool_id === pool_id
-              );
+            {data.data.map((meta, index) => (
+              <SwiperSlide key={meta.pool_id}>
+                <Box
+                  borderRadius="xl"
+                  border="0.0625rem solid"
+                  borderColor="#52525B"
+                  bg="#3F3F46"
+                >
+                  <Link to={`/pool/${meta.pool_id}`}>
+                    <RatioPicture src={metaNFT?.[index]?.image || null} />
 
-              const currentMetaNFT = lootTableOf
-                ?.map(meta => {
-                  if (meta.maybeNfT) {
-                    const find = metaNFT?.find(
-                      ({ nft_id, collection_id }) =>
-                        collection_id === meta.maybeNfT?.collection_id &&
-                        nft_id === meta.maybeNfT.nft_id
-                    );
+                    <Stack spacing={3} padding={4} pt={6}>
+                      <Center
+                        justifyContent="space-between"
+                        fontWeight="medium"
+                        color="white"
+                      >
+                        <Text>{metaNFT?.[index]?.name}</Text>
 
-                    if (find) {
-                      return {
-                        pool_id: meta.pool_id,
-                        title: find?.title,
-                        avatar: find?.avatar,
-                      };
-                    }
-                  }
-                })
-                .find(meta => meta?.pool_id === pool_id);
+                        <Text fontSize="sm">ID: {meta.pool_id}</Text>
+                      </Center>
 
-              if (index < 5) {
-                return (
-                  <SwiperSlide key={pool_id}>
-                    <Box
-                      borderRadius="xl"
-                      border="0.0625rem solid"
-                      borderColor="#52525B"
-                      bg="#3F3F46"
-                    >
-                      <Link to={`/pool/${pool_id}`}>
-                        <RatioPicture
-                          src={
-                            currentMetaNFT?.avatar
-                              ? cloundinary_link(currentMetaNFT.avatar)
-                              : null
-                          }
+                      <Center
+                        justifyContent="space-between"
+                        fontWeight="medium"
+                        color="white"
+                        fontSize="sm"
+                      >
+                        <Box>
+                          <Text fontWeight="normal" color="shader.a.500">
+                            Mint fee:
+                          </Text>
+                          <Text as="span">
+                            {formatGAFI(meta.minting_fee)}&nbsp; GAFI
+                          </Text>
+                        </Box>
+
+                        <Box textAlign="right">
+                          <Text fontWeight="normal" color="shader.a.500">
+                            Type:
+                          </Text>
+                          <Text as="span">{meta.type_pool}</Text>
+                        </Box>
+                      </Center>
+
+                      <Box
+                        width="fit-content"
+                        fontSize="xs"
+                        fontWeight="medium"
+                        borderRadius="lg"
+                        bg={convertHex('#ffffff', 0.1)}
+                        color="#CED1D7"
+                        px={2}
+                      >
+                        <DateBlock
+                          end={meta.end_at ? 'Expired' : 'Infinity'}
+                          endBlock={meta.end_at}
                         />
-
-                        <Stack spacing={3} padding={4} pt={6}>
-                          <Center
-                            justifyContent="space-between"
-                            fontWeight="medium"
-                            color="white"
-                          >
-                            <Text>{currentMetaPool?.title || 'unknown'}</Text>
-
-                            <Text fontSize="sm">ID: {pool_id}</Text>
-                          </Center>
-
-                          <Center
-                            justifyContent="space-between"
-                            fontWeight="medium"
-                            color="white"
-                            fontSize="sm"
-                          >
-                            <Box>
-                              <Text fontWeight="normal" color="shader.a.500">
-                                Mint fee:
-                              </Text>
-                              <Text as="span">{formatGAFI(price)} GAFI</Text>
-                            </Box>
-
-                            <Box textAlign="right">
-                              <Text fontWeight="normal" color="shader.a.500">
-                                Type:
-                              </Text>
-                              <Text as="span">{poolType}</Text>
-                            </Box>
-                          </Center>
-
-                          <Box
-                            width="fit-content"
-                            fontSize="xs"
-                            fontWeight="medium"
-                            borderRadius="lg"
-                            bg={convertHex('#ffffff', 0.1)}
-                            color="#CED1D7"
-                            px={2}
-                          >
-                            <DateBlock
-                              endBlock={
-                                endBlock.isSome ? endBlock.value.toNumber() : -1
-                              }
-                              end={endBlock.isSome ? 'Expired' : 'Infinity'}
-                            />
-                          </Box>
-                        </Stack>
-                      </Link>
-                    </Box>
-                  </SwiperSlide>
-                );
-              }
-            })}
+                      </Box>
+                    </Stack>
+                  </Link>
+                </Box>
+              </SwiperSlide>
+            ))}
           </Swiper>
         ) : isLoading ? null : (
           <Center color="white">Empty</Center>

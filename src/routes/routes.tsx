@@ -14,6 +14,7 @@ import Blockchain, { ListBlockchain } from 'pages/Blockchain';
 import AccountSwap from 'pages/Account/AccountSwap';
 import Swap from 'pages/Swap';
 import Wishlist from 'pages/Wishlist';
+import Game from 'pages/Game';
 
 const router = createBrowserRouter([
   {
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
       {
         path: 'nft/:nft_id/:collection_id',
         element: <NFT />,
+      },
+      {
+        path: 'game/:game_id',
+        element: <Game />,
       },
       {
         path: 'blockchain',

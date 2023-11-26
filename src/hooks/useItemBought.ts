@@ -5,15 +5,11 @@ import useSubscribeSystem from './useSubscribeSystem';
 
 interface useItemBoughtProps {
   trade_id: number;
-  amount: number;
-  bidPrice: number;
   refetch?: () => void;
 }
 
 export default function useItemBought({
   trade_id,
-  amount,
-  bidPrice,
   refetch,
 }: useItemBoughtProps) {
   const { event, setEvent } = useSubscribeSystem('game::ItemBought');
@@ -42,10 +38,7 @@ export default function useItemBought({
 
   return {
     isLoading,
-    mutation: () => {
-      if (api) {
-        mutation(api.tx.game.buyItem(trade_id, amount, bidPrice));
-      }
-    },
+    mutation,
+    api,
   };
 }

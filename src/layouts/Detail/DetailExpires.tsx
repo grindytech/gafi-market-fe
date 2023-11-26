@@ -1,13 +1,13 @@
 import { Text } from '@chakra-ui/react';
 import DateBlock from 'components/DateBlock';
 
-interface BundleLayoutExpiresProps {
+interface DetailExpiresProps {
   heading: string;
   endBlock: number;
   end?: 'Expired' | 'Infinity';
 }
 
-export default ({ heading, end, endBlock }: BundleLayoutExpiresProps) => {
+export default ({ heading, end, endBlock }: DetailExpiresProps) => {
   return (
     <Text
       py={4}

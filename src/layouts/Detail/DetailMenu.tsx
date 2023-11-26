@@ -12,7 +12,7 @@ import { convertHex } from 'utils/utils';
 import MenuIcon from 'public/assets/line/menu.svg';
 import React from 'react';
 
-interface BundleLayoutMenuProps {
+interface DetailMenuProps {
   menu: {
     heading: string;
     icon?: any;
@@ -21,7 +21,7 @@ interface BundleLayoutMenuProps {
   sx?: MenuItemProps;
 }
 
-export default ({ menu, sx }: BundleLayoutMenuProps) => {
+export default ({ menu, sx }: DetailMenuProps) => {
   return (
     <Menu placement="bottom-end">
       <MenuButton

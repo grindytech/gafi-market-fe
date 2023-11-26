@@ -1,7 +1,5 @@
 import { Box, Center, Grid, Text } from '@chakra-ui/react';
 
-import { cloundinary_link } from 'axios/cloudinary_axios';
-
 import RatioPicture from 'components/RatioPicture';
 
 import useMetaCollection from 'hooks/useMetaCollection';
@@ -40,7 +38,7 @@ export default function NFTDetailListNFT() {
       <Text fontSize="xl" fontWeight="semibold" color="shader.a.900" mt={10}>
         More from&nbsp;
         <Text as="span" color="primary.a.500">
-          {MetaCollection?.[0]?.title || 'unknown'}
+          {MetaCollection?.[0]?.name}
         </Text>
       </Text>
 
@@ -76,11 +74,7 @@ export default function NFTDetailListNFT() {
                   fontWeight="medium"
                 >
                   <RatioPicture
-                    src={
-                      currentMetaNFT?.avatar
-                        ? cloundinary_link(currentMetaNFT.avatar)
-                        : null
-                    }
+                    src={currentMetaNFT?.image || null}
                     alt={nft_id}
                   />
 
@@ -95,13 +89,11 @@ export default function NFTDetailListNFT() {
                       fontSize="inherit"
                       fontWeight="inherit"
                     >
-                      {MetaCollection?.[0]?.title || 'unknown'}
+                      {MetaCollection?.[0]?.name}
                     </Text>
 
                     <Center justifyContent="space-between">
-                      <Text color="shader.a.900">
-                        {currentMetaNFT?.title || 'unknown'}
-                      </Text>
+                      <Text color="shader.a.900">{currentMetaNFT?.name}</Text>
 
                       <Text as="span">{nft_id}</Text>
                     </Center>

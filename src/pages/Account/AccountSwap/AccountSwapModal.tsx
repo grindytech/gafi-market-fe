@@ -24,13 +24,13 @@ import { useParams } from 'react-router-dom';
 import { formatCurrency, shorten } from 'utils/utils';
 import RatioPicture from 'components/RatioPicture';
 import GafiAmount from 'components/GafiAmount';
-import { cloundinary_link } from 'axios/cloudinary_axios';
 
 import { UseFormWatch } from 'react-hook-form';
 import useSignAndSend from 'hooks/useSignAndSend';
 import { useAppSelector } from 'hooks/useRedux';
 import useBlockTime from 'hooks/useBlockTime';
 import { AccountSwapFieldProps } from '.';
+import { unitGAFI } from 'utils/contants.utils';
 
 interface AccountSwapModalProps {
   watch: UseFormWatch<AccountSwapFieldProps>;
@@ -70,8 +70,6 @@ export default ({ watch, onSuccess }: AccountSwapModalProps) => {
         borderRadius="xl"
         bg="shader.a.1000"
         onClick={onToggle}
-        _hover={{}}
-        _active={{}}
       >
         Continue
       </Button>
@@ -171,9 +169,7 @@ export default ({ watch, onSuccess }: AccountSwapModalProps) => {
                       {get_my_self.map(meta => (
                         <ListItem key={`${meta.collection_id}/${meta.nft_id}`}>
                           <RatioPicture
-                            src={
-                              meta.image ? cloundinary_link(meta.image) : null
-                            }
+                            src={meta.image || null}
                             sx={{ width: 12, height: 12 }}
                           />
 
@@ -184,7 +180,7 @@ export default ({ watch, onSuccess }: AccountSwapModalProps) => {
                               color="inherit"
                               fontSize="sm"
                             >
-                              {meta.title}&nbsp;
+                              {meta.name}&nbsp;
                               <Text
                                 as="span"
                                 fontWeight="normal"
@@ -212,9 +208,7 @@ export default ({ watch, onSuccess }: AccountSwapModalProps) => {
                       {get_owner_self.map(meta => (
                         <ListItem key={`${meta.collection_id}/${meta.nft_id}`}>
                           <RatioPicture
-                            src={
-                              meta.image ? cloundinary_link(meta.image) : null
-                            }
+                            src={meta.image || null}
                             sx={{ width: 12, height: 12 }}
                           />
 
@@ -225,7 +219,7 @@ export default ({ watch, onSuccess }: AccountSwapModalProps) => {
                               color="inherit"
                               fontSize="sm"
                             >
-                              {meta.title}&nbsp;
+                              {meta.name}&nbsp;
                               <Text
                                 as="span"
                                 fontWeight="normal"
@@ -277,9 +271,7 @@ export default ({ watch, onSuccess }: AccountSwapModalProps) => {
                     }}
                   />
 
-                  <Text fontSize="sm">
-                    {formatCurrency(Number(price) || 0)}
-                  </Text>
+                  <Text fontSize="sm">{formatCurrency(price || 0)}</Text>
                 </Box>
               </Center>
 
@@ -289,11 +281,10 @@ export default ({ watch, onSuccess }: AccountSwapModalProps) => {
                 borderRadius="xl"
                 mt={6}
                 isLoading={isLoading}
-                _hover={{}}
                 onClick={() => {
                   if (api) {
                     mutation(
-                      api.tx.game.setSwap(
+                      api.tx.game.createSwap(
                         get_my_self.map(meta => ({
                           collection: meta.collection_id,
                           item: meta.nft_id,
@@ -304,7 +295,7 @@ export default ({ watch, onSuccess }: AccountSwapModalProps) => {
                           item: meta.nft_id,
                           amount: meta.amount,
                         })),
-                        price || 0,
+                        BigInt(unitGAFI(price) || 0),
                         blockNumber,
                         blockNumber + duration.time
                       )

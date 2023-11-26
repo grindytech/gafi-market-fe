@@ -15,20 +15,20 @@ import {
 
 import RatioPicture from 'components/RatioPicture';
 
-import { cloundinary_link } from 'axios/cloudinary_axios';
 import AccountOwnerIncrement from './AccountOwnerIncrement';
 import { Control, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { AccountOwnerFieldProps } from '.';
 
-import useMetaNFT from 'hooks/useMetaNFT';
-import useMetaCollection from 'hooks/useMetaCollection';
-import { useParams } from 'react-router-dom';
+import { MetaCollectionFieldProps } from 'hooks/useMetaCollection';
+
 import AccountOwnerModalTab from './AccountOwnerModalTab';
 import { useEffect } from 'react';
 
 interface AccountOwnerModalProps {
   onClose: () => void;
   onSuccess: () => void;
+  MetaCollection: MetaCollectionFieldProps[] | undefined;
+
   formState: {
     control: Control<AccountOwnerFieldProps, any>;
     setValue: UseFormSetValue<AccountOwnerFieldProps>;
@@ -40,27 +40,11 @@ export default function AccountOwnerModal({
   formState,
   onClose,
   onSuccess,
+  MetaCollection,
 }: AccountOwnerModalProps) {
-  const { address } = useParams();
-
   const { product: productForm } = formState.watch();
 
   const product = Object.values(productForm || []).filter(meta => !!meta);
-
-  const { metaNFT } = useMetaNFT({
-    key: `account/${address}`,
-    filter: 'collection_id',
-    arg: product.map(({ collection_id, nft_id }) => ({
-      collection_id,
-      nft_id,
-    })),
-  });
-
-  const { MetaCollection } = useMetaCollection({
-    key: `account/${address}`,
-    filter: 'collection_id',
-    arg: product.map(({ collection_id }) => collection_id),
-  });
 
   useEffect(() => {
     product.forEach((_, index) => {
@@ -107,71 +91,67 @@ export default function AccountOwnerModal({
             }}
             gap={2}
           >
-            {product.map(({ collection_id, nft_id, amount }, index) => {
-              const key = `${nft_id}/${collection_id}`;
+            {product.map(
+              ({ collection_id, amount, image, name, token_id }, index) => {
+                const key = `${token_id}/${collection_id}`;
 
-              const currentMetaNFT = metaNFT?.find(
-                data =>
-                  data?.collection_id === collection_id &&
-                  data?.nft_id === nft_id
-              );
+                const currentMetaCollection = MetaCollection?.find(
+                  data => Number(data?.collection_id) === Number(collection_id)
+                );
 
-              const currentMetaCollection = MetaCollection?.find(
-                data => data?.collection_id === collection_id
-              );
-
-              return (
-                <ListItem
-                  key={key}
-                  border="0.0625rem solid"
-                  borderColor="shader.a.300"
-                  borderRadius="xl"
-                  display="flex"
-                  alignItems="start"
-                  padding={2}
-                  gap={4}
-                >
-                  <RatioPicture
-                    src={
-                      currentMetaNFT?.avatar
-                        ? cloundinary_link(currentMetaNFT.avatar)
-                        : null
-                    }
-                    sx={{ width: 20, height: 20 }}
-                  />
-
-                  <Box
-                    fontWeight="medium"
-                    color="shader.a.900"
-                    flex={1}
-                    width={24}
-                    wordBreak="break-word"
+                return (
+                  <ListItem
+                    key={key}
+                    border="0.0625rem solid"
+                    borderColor="shader.a.300"
+                    borderRadius="xl"
+                    display="flex"
+                    alignItems="start"
+                    padding={2}
+                    gap={4}
                   >
-                    <Text fontSize="sm" color="shader.a.500">
-                      {currentMetaCollection?.title || '-'}
-                    </Text>
+                    <RatioPicture
+                      src={image || null}
+                      sx={{ width: 20, height: 20 }}
+                    />
 
-                    <Text as="strong">
-                      {currentMetaNFT?.title || '-'}&nbsp;
-                      <Text as="span" fontWeight="normal" color="shader.a.700">
-                        ID: {nft_id}
+                    <Box
+                      fontWeight="medium"
+                      color="shader.a.900"
+                      flex={1}
+                      width={24}
+                      wordBreak="break-word"
+                    >
+                      <Text fontSize="sm" color="shader.a.500">
+                        {currentMetaCollection?.name}
                       </Text>
-                    </Text>
 
-                    <Text fontSize="xs" fontWeight="normal">
-                      x{amount}
-                    </Text>
-                  </Box>
+                      <Text as="strong">
+                        {name}&nbsp;
+                        <Text
+                          as="span"
+                          fontWeight="normal"
+                          color="shader.a.700"
+                        >
+                          ID: {token_id}
+                        </Text>
+                      </Text>
 
-                  <AccountOwnerIncrement
-                    formState={{
-                      control: formState.control,
-                      value: `selected.${index}`,
-                    }}
-                  />
-                </ListItem>
-              );
-            })}
+                      <Text fontSize="xs" fontWeight="normal">
+                        x{amount}
+                      </Text>
+                    </Box>
+
+                    <AccountOwnerIncrement
+                      formState={{
+                        control: formState.control,
+                        value: `selected.${index}`,
+                      }}
+                    />
+                  </ListItem>
+                );
+              }
+            )}
           </List>
 
           <AccountOwnerModalTab onSuccess={onSuccess} formState={formState} />

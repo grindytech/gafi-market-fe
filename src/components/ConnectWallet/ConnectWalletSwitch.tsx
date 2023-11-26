@@ -1,10 +1,11 @@
 import { Box } from '@chakra-ui/react';
 import { PropsWithChildren } from 'react';
-import { GAFI_WALLET_ACCOUNT_KEY } from 'utils/constants';
+import { GAFI_WALLET_ACCOUNT_KEY } from 'utils/contants.utils';
 import ConnectWalletProfile from './ConnectWalletProfile';
-import { InjectedAccount } from '@polkadot/extension-inject/types';
+
 import { useDispatch } from 'react-redux';
 import { injectedAccount } from 'redux/injected';
+import { InjectedAccount } from 'types/polkadot.type';
 
 interface ConnectWalletSwitchProps extends PropsWithChildren {
   onClose: () => void;
