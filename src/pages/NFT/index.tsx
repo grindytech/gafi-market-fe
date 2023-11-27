@@ -117,9 +117,9 @@ export default () => {
   };
 
   const currentMetaNFT = metaNFT?.find(
-    data =>
-      data?.collection_id === Number(collection_id) &&
-      data?.nft_id === bundleOf?.[0].nft_id
+    meta =>
+      meta.nft_id === Number(nft_id) &&
+      meta.collection_id === Number(collection_id)
   );
 
   if (isLoading)
@@ -181,11 +181,7 @@ export default () => {
                       : 0
                   }
                   amount={listing?.amount}
-                  metaNFT={metaNFT?.find(
-                    meta =>
-                      meta?.collection_id === listing?.collection_id &&
-                      meta.nft_id === listing?.nft_id
-                  )}
+                  metaNFT={currentMetaNFT}
                   metaCollection={MetaCollection}
                 />
 

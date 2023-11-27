@@ -34,7 +34,7 @@ export interface AccountOwnerFieldProps {
   product?: {
     amount: number;
     collection_id: number;
-    token_id: number;
+    nft_id: number;
     image: string;
     name: string;
   }[];
@@ -90,7 +90,7 @@ export default function AccountOwner() {
         const found_select = data?.find(
           meta =>
             Number(meta.collection_id) === Number(collection_id) &&
-            Number(meta.token_id) === Number(nft_id)
+            Number(meta.nft_id) === Number(nft_id)
         );
 
         setValue(`product.${index}`, found_select as never);
@@ -124,12 +124,12 @@ export default function AccountOwner() {
                 data => data?.collection_id === Number(meta.collection_id)
               );
 
-              const key = `${meta.token_id}/${meta.collection_id}`;
+              const key = `${meta.nft_id}/${meta.collection_id}`;
 
               const isActive = product?.find(
                 data =>
                   Number(data?.collection_id) === Number(meta.collection_id) &&
-                  Number(data?.token_id) === Number(meta.token_id)
+                  Number(data?.nft_id) === Number(meta.nft_id)
               );
 
               return (
@@ -172,7 +172,7 @@ export default function AccountOwner() {
                         setValue(`product.${index}`, {
                           amount: meta.supply,
                           collection_id: meta.collection_id,
-                          token_id: meta.token_id,
+                          nft_id: meta.nft_id,
                           image: meta?.image,
                           name: meta?.name,
                         });
@@ -196,7 +196,7 @@ export default function AccountOwner() {
                         <Text>{meta?.name}</Text>
 
                         <Text as="span" fontSize="sm">
-                          ID: {meta.token_id}
+                          ID: {meta.nft_id}
                         </Text>
                       </Center>
                     </Box>
@@ -236,7 +236,7 @@ export default function AccountOwner() {
                     meta={{
                       amount: meta.supply,
                       collection_id: meta.collection_id,
-                      token_id: meta.token_id,
+                      nft_id: meta.nft_id,
                       image: meta?.image,
                       name: meta?.name,
                     }}

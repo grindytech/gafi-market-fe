@@ -80,7 +80,7 @@ export default ({ queryKey, setThumbsSwiper, bundleOf }: SwiperLayoutItems) => {
                     <Flex gap={4}>
                       <RatioPicture
                         src={currentMetaNFT?.image || null}
-                        sx={{ width: 12 }}
+                        sx={{ width: 12, height: 12 }}
                       />
 
                       <Box>

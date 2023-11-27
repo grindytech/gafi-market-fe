@@ -47,7 +47,7 @@ export default ({ lootTable, setThumbsSwiper, data }: PoolItemsProps) => {
               const currentMetaNFT = data?.find(
                 children =>
                   children?.collection_id === meta.nft?.collection &&
-                  children?.token_id === meta.nft?.item
+                  children?.nft_id === meta.nft?.item
               );
 
               return (

@@ -14,29 +14,8 @@ import useNFTsCollection from 'hooks/useNFTsCollection';
 export default () => {
   const { game_id } = useParams();
 
-  // const { data, isLoading, fetchNextPage } = useInfiniteQuery({
-  //   queryKey: [`game_detail_collection hehe /${game_id}`],
-  //   queryFn: async ({ pageParam }) => {
-  //     return await axiosSwagger.collectionSearch({
-  //       body: {
-  //         size: pageParam || 5,
-  //         query: {
-  //           game_id: [game_id as string],
-  //         },
-  //       },
-  //     });
-  //   },
-  //   getNextPageParam: (arg, open) => {
-  //     console.log({ arg, open });
-
-  //     return (arg.page = arg.page += 1);
-  //   },
-  //   // staleTime: Infinity,
-  // });
-  // console.log(data);
-
   const { data, isLoading } = useQuery({
-    queryKey: [`game_detail_collection hehe /${game_id}`],
+    queryKey: [`game_detail_collection/${game_id}`],
     queryFn: async () => {
       return await axiosSwagger.collectionSearch({
         body: {
@@ -65,15 +44,6 @@ export default () => {
 
   return (
     <>
-      {/* <Button
-        onClick={() => {
-          // observer.fetchNextPage();
-          fetchNextPage();
-        }}
-      >
-        hahaha
-      </Button> */}
-
       {data?.data.length && NFTsCollection?.length ? (
         <>
           <Text

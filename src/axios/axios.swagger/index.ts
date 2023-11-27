@@ -13,9 +13,7 @@ import {
 } from 'types/swagger.type';
 
 const create = axios.create({
-  baseURL: `http://localhost:8080/api/v1/`,
-  // baseURL: `https://mp-api.gafi.network/api/v1/`,
-  // baseURL: 'http://192.1.23.21/',
+  baseURL: `https://mp-api.gafi.network/api/v1/`,
 });
 
 const collectionSearch = async ({

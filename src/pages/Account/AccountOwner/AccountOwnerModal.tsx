@@ -92,8 +92,8 @@ export default function AccountOwnerModal({
             gap={2}
           >
             {product.map(
-              ({ collection_id, amount, image, name, token_id }, index) => {
-                const key = `${token_id}/${collection_id}`;
+              ({ collection_id, amount, image, name, nft_id }, index) => {
+                const key = `${nft_id}/${collection_id}`;
 
                 const currentMetaCollection = MetaCollection?.find(
                   data => Number(data?.collection_id) === Number(collection_id)
@@ -133,7 +133,7 @@ export default function AccountOwnerModal({
                           fontWeight="normal"
                           color="shader.a.700"
                         >
-                          ID: {token_id}
+                          ID: {nft_id}
                         </Text>
                       </Text>
 

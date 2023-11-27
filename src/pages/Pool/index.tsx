@@ -66,7 +66,7 @@ export default () => {
                 body: {
                   query: {
                     collection_id: meta.nft?.collection as never,
-                    token_id: meta.nft?.item as never,
+                    nft_id: meta.nft?.item as never,
                   },
                 },
               });
@@ -123,7 +123,7 @@ export default () => {
         metaNFT={
           dataNFT?.map(meta => ({
             collection_id: meta?.collection_id,
-            nft_id: meta?.token_id,
+            nft_id: meta?.nft_id,
             image: meta?.image,
           })) as MetaNFTFieldProps[]
         }

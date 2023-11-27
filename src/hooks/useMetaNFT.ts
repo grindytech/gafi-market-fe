@@ -38,15 +38,13 @@ export default function useMetaNFT({
           return service.map(([key, option]) => {
             const meta = option as Option<PalletNftsItemMetadata>;
 
-            const metadata = JSON.parse(
-              String(meta.value.data.toHuman())
-            ) as TypeMetaNFT;
+            const metadata = JSON.parse(String(meta.value.data.toHuman()));
 
             return {
               ...metadata,
               collection_id: key.args[0].toNumber(),
               nft_id: key.args[1].toNumber(),
-            } as MetaNFTFieldProps;
+            };
           });
         }
 
@@ -61,15 +59,13 @@ export default function useMetaNFT({
               // not found
               if (service.isEmpty) return;
 
-              const metadata = JSON.parse(
-                String(service.value.data.toHuman())
-              ) as TypeMetaNFT;
+              const metadata = JSON.parse(String(service.value.data.toHuman()));
 
               return {
                 ...metadata,
                 collection_id,
                 nft_id,
-              } as MetaNFTFieldProps;
+              };
             })
           ).then(data =>
             data.filter((meta): meta is MetaNFTFieldProps => !!meta)
@@ -109,7 +105,7 @@ export default function useMetaNFT({
   }, [event]);
 
   useEffect(() => {
-    if (!async && !isLoading) {
+    if (async && !isLoading) {
       refetch();
     }
   }, [async, isLoading]);

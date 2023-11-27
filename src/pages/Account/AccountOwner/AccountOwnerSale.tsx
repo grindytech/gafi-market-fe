@@ -68,7 +68,7 @@ export default function AccountOwnerSale({
           }
 
           return navigate(
-            `/nft/${product[0].token_id}/${product[0].collection_id}`
+            `/nft/${product[0].nft_id}/${product[0].collection_id}`
           );
         }
 
@@ -139,9 +139,9 @@ export default function AccountOwnerSale({
               if (isBundle) {
                 return mutation(
                   api.tx.game.setBundle(
-                    product.map(({ collection_id, token_id }, index) => ({
+                    product.map(({ collection_id, nft_id }, index) => ({
                       collection: Number(collection_id),
-                      item: Number(token_id),
+                      item: Number(nft_id),
                       amount: selected[index],
                     })),
                     BigInt(unitGAFI(price)),
@@ -156,7 +156,7 @@ export default function AccountOwnerSale({
                 api.tx.game.setPrice(
                   {
                     collection: Number(product[0].collection_id),
-                    item: Number(product[0].token_id),
+                    item: Number(product[0].nft_id),
                     amount: selected[0],
                   },
                   BigInt(unitGAFI(price)),

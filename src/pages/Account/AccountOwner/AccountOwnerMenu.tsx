@@ -29,7 +29,7 @@ interface AccountOwnerMenuProps {
   meta: {
     amount: number;
     collection_id: number;
-    token_id: number;
+    nft_id: number;
     image: string;
     name: string;
   };

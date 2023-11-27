@@ -99,9 +99,9 @@ export default ({ data, isLoading }: CollectionNFTProps) => {
             >
               {data.data.map(meta => (
                 <Box
-                  key={meta.token_id}
+                  key={meta.nft_id}
                   as={Link}
-                  to={`/nft/${meta.token_id}/${meta.collection_id}`}
+                  to={`/nft/${meta.nft_id}/${meta.collection_id}`}
                   border="0.0625rem solid"
                   borderColor="shader.a.300"
                   bg="white"
@@ -117,7 +117,7 @@ export default ({ data, isLoading }: CollectionNFTProps) => {
                     <Text color="shader.a.500">
                       ID:&nbsp;
                       <Text as="span" color="primary.a.500" fontWeight="medium">
-                        {meta.token_id}
+                        {meta.nft_id}
                       </Text>
                     </Text>
                   </Center>
